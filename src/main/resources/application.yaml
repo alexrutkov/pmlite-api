@@ -1,0 +1,18 @@
+app:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    validity-in-ms: P7D
+
+spring:
+  application:
+    name: pmlite-api
+  datasource:
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.master.xml
+    user: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}

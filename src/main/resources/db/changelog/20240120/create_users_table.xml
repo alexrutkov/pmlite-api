@@ -1,0 +1,33 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="20240120_create_users" author="alur">
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="email" type="CITEXT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="false" />
+            </column>
+            <column name="password" type="VARCHAR(60)">
+                <constraints nullable="false" />
+            </column>
+            <column name="verified_email" type="BOOLEAN" defaultValueComputed="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex indexName="index_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
