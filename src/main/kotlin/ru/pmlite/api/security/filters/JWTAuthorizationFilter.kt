@@ -7,7 +7,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.HttpHeaders
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.filter.OncePerRequestFilter
@@ -56,7 +55,6 @@ class JWTAuthorizationFilter(
 
     private fun resolveToken(request: HttpServletRequest): String? {
         val bearerToken = request.cookies?.find { it.name.equals(AUTH_COOKIE_NAME) }?.value
-            ?: request.getHeader(HttpHeaders.AUTHORIZATION)?.replace("Bearer ", "")
         return if (!bearerToken.isNullOrBlank()) bearerToken
         else null
     }

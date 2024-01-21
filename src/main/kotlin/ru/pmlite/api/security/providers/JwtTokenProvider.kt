@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import jakarta.servlet.http.Cookie
 import mu.KotlinLogging
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -13,6 +14,7 @@ import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import ru.pmlite.api.security.config.JwtProperties
+import ru.pmlite.api.security.filters.AUTH_COOKIE_NAME
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -29,12 +31,13 @@ class JwtTokenProvider(
         .let{ Keys.hmacShaKeyFor(it.toByteArray()) }
 
 
-    fun createToken(authentication: Authentication): String {
+    fun createTokenByAuthentication(authentication: Authentication): String {
         val username: String = authentication.name
         val authorities: Collection<GrantedAuthority> = authentication.authorities
-        val claims: Claims =  Jwts.claims().subject(username).build()
+        val claims: Claims =  Jwts.claims().subject(username)
+            .add(AUTHORITIES_KEY, authorities.joinToString(", ") { it.authority.toString() })
+            .build()
 
-        claims[AUTHORITIES_KEY] = authorities.joinToString(", ") { it.authority.toString() }
         val now = Date()
         val validity = Date(now.time + jwtProperties.validityInMs.toMillis())
         return Jwts.builder()
@@ -63,5 +66,11 @@ class JwtTokenProvider(
             logger.info("Invalid JWT token. IllegalArgumentException")
         }
         return false
+    }
+
+    fun getAuthenticationCookieByToken(token: String) = Cookie(AUTH_COOKIE_NAME, token).apply {
+        isHttpOnly = true
+        maxAge = jwtProperties.validityInMs.toSeconds().toInt()
+        path = "/"
     }
 }

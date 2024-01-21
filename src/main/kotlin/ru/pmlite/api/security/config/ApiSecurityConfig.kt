@@ -26,7 +26,7 @@ class ApiSecurityConfig {
             .csrf {
                 it
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler())
+                    .csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler().apply { setCsrfRequestAttributeName(null) })
             }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
