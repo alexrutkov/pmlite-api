@@ -15,7 +15,6 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 import ru.pmlite.api.security.filters.AUTH_COOKIE_NAME
 import ru.pmlite.api.security.filters.JWTAuthorizationFilter
 
-const val ANGULAR_CSRF_TOKEN_NAME = "_csrf"
 @Configuration
 @EnableWebSecurity
 class ApiSecurityConfig {
@@ -45,6 +44,7 @@ class ApiSecurityConfig {
                     "/api/createToken",
                     "/api/registration/**",
                     ).permitAll()
+                    .requestMatchers("/error").permitAll()
                     .requestMatchers("/api/isAuthorized").authenticated()
                     .requestMatchers("/api/**").hasRole("USER")
                     .anyRequest().authenticated()

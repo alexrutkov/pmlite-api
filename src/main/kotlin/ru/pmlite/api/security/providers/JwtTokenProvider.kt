@@ -17,7 +17,6 @@ import java.util.*
 import javax.crypto.SecretKey
 
 const val AUTHORITIES_KEY = "roles"
-const val PRINCIPAL_KEY = "principal"
 
 private val logger = KotlinLogging.logger {}
 @Component

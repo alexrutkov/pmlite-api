@@ -13,10 +13,10 @@
             <column name="email" type="CITEXT">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="description" type="TEXT">
+            <column name="description" type="TEXT" defaultValue="">
                 <constraints nullable="false" />
             </column>
-            <column name="password" type="VARCHAR(60)">
+            <column name="password" type="VARCHAR(60)" defaultValue="">
                 <constraints nullable="false" />
             </column>
             <column name="verified_email" type="BOOLEAN" defaultValueComputed="false">

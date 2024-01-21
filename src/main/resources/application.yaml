@@ -2,6 +2,8 @@ app:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
     validity-in-ms: P7D
+  recapture:
+    secret-key: ${RECAPTURE_SECRET_KEY}
 
 spring:
   application:
@@ -16,3 +18,7 @@ spring:
     user: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     url: ${SPRING_DATASOURCE_URL}
+
+server:
+  error:
+    include-message: always
