@@ -11,10 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.AuthorityUtils
-import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import ru.pmlite.api.security.config.JwtProperties
 import ru.pmlite.api.security.filters.AUTH_COOKIE_NAME
+import ru.pmlite.api.values.UserId
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -51,8 +51,7 @@ class JwtTokenProvider(
     fun getAuthentication(token: String): Authentication {
         val claims: Claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).payload
         val authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims[AUTHORITIES_KEY].toString())
-        val principal = User(claims.subject, "", authorities)
-
+        val principal = UserId(claims.subject.toLong())
         return UsernamePasswordAuthenticationToken(principal, token, authorities)
     }
 

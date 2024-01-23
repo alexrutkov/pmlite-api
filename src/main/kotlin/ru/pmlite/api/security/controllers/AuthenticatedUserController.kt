@@ -1,16 +1,16 @@
 package ru.pmlite.api.security.controllers
 
 import mu.KotlinLogging
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.security.dto.CreateTokenCommand
+import ru.pmlite.api.security.services.SecurityService
 
 private val logger = KotlinLogging.logger {}
-@RequestMapping("/api")
+@RequestMapping("/api/authorization")
 @RestController
-class AuthenticatedUserController {
+class AuthenticatedUserController(
+    private val securityService: SecurityService
+) {
 
     @PostMapping("createToken")
     fun createToken(
@@ -18,4 +18,7 @@ class AuthenticatedUserController {
     ) {
         logger.info(command.toString())
     }
+
+    @GetMapping("isAuthorized")
+    fun isAuthorized() = securityService.isAuthorized
 }

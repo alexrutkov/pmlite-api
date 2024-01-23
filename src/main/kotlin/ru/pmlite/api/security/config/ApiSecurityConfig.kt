@@ -38,15 +38,16 @@ class ApiSecurityConfig {
                     .logoutUrl("/api/logout")
                     .logoutSuccessHandler { _, response, _ -> response.status = 200 }
             }
-            .authorizeHttpRequests {
-                it.requestMatchers(
-                      HttpMethod.POST,
-                    "/api/createToken",
-                    "/api/registration/**",
-                    ).permitAll()
+            .authorizeHttpRequests { requests ->
+                requests
+                    .requestMatchers(HttpMethod.POST, "/api/registration/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/authorization/createToken").permitAll()
                     .requestMatchers("/error").permitAll()
-                    .requestMatchers("/api/isAuthorized").authenticated()
+
+                    .requestMatchers("/api/authorization/isAuthorized").authenticated()
+
                     .requestMatchers("/api/**").hasRole("USER")
+
                     .anyRequest().authenticated()
             }
             .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }

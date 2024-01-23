@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="20240123_create_team_users" author="alur">
+        <createTable tableName="team_users" >
+            <column name="team_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="agreement_state" type="varchar(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_teams_team_users"
+                                 baseTableName="team_users" baseColumnNames="team_id"
+                                 referencedTableName="teams" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_users_team_users"
+                                 baseTableName="team_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+    </changeSet>
+</databaseChangeLog>

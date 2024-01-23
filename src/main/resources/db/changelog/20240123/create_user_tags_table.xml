@@ -1,0 +1,26 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="20240123_create_user_tags" author="alur">
+        <createTable tableName="user_tags" >
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="tag_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_users_user_tags"
+                                 baseTableName="user_tags" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_tags_user_tags"
+                                 baseTableName="user_tags" baseColumnNames="tag_id"
+                                 referencedTableName="tags" referencedColumnNames="id"
+        />
+    </changeSet>
+</databaseChangeLog>
