@@ -1,0 +1,13 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="2024-01-24_create_enum_users_state" author="alur">
+        <sql>
+            create type user_state as enum ('PENDING', 'CONFIRMED', 'BLOCKED');
+        </sql>
+        <addColumn tableName="users">
+            <column name="state" type="user_state" defaultValue="PENDING"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

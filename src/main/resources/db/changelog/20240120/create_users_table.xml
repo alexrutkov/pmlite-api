@@ -3,6 +3,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="20240120_create_users" author="alur">
+        <preConditions>
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
         <createTable tableName="users">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
@@ -22,7 +27,7 @@
             <column name="verified_email" type="BOOLEAN" defaultValueComputed="false">
                 <constraints nullable="false" />
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
         </createTable>

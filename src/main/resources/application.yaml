@@ -8,16 +8,25 @@ app:
 spring:
   application:
     name: pmlite-api
-  datasource:
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    url: ${SPRING_DATASOURCE_URL}
-    driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:db/changelog/db.changelog.master.xml
     user: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     url: ${SPRING_DATASOURCE_URL}
+  mail:
+    host: smtp.mail.ru
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connection-timeout: 5000
+          ssl.trust: smtp.mail.ru
+          starttls.enable: true
+          timeout: 3000
+          write-timeout: 5000
+        transport.protocol: smtp
+    default-encoding: UTF-8
 
 server:
   error:

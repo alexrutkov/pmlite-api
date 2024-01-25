@@ -16,5 +16,8 @@
     <include file="20240123/create_team_tags_table.xml" relativeToChangelogFile="true" />
 
     <include file="20240123/create_user_tags_table.xml" relativeToChangelogFile="true" />
+    <include file="2024-01-24/create_enum_users_state.xml" relativeToChangelogFile="true" />
+
+
 
 </databaseChangeLog>

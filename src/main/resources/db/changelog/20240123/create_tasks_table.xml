@@ -22,7 +22,7 @@
             <column name="parent_id" type="bigint">
                 <constraints nullable="true" />
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
         </createTable>

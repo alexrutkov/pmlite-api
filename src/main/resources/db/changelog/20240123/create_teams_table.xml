@@ -13,7 +13,7 @@
             <column name="short_description" type="varchar(255)" defaultValue="">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
         </createTable>

@@ -13,7 +13,7 @@
             <column name="agreement_state" type="varchar(20)" defaultValue="PENDING">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="now()">
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
         </createTable>
