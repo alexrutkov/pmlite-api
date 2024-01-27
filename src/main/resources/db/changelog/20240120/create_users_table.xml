@@ -3,11 +3,14 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="20240120_create_users" author="alur">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="users"/>
             </not>
         </preConditions>
+        <sql>
+            create type user_state as enum ('PENDING', 'CONFIRMED', 'BLOCKED');
+        </sql>
         <createTable tableName="users">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
@@ -24,10 +27,10 @@
             <column name="password" type="VARCHAR(60)" defaultValue="">
                 <constraints nullable="false" />
             </column>
-            <column name="verified_email" type="BOOLEAN" defaultValueComputed="false">
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
-            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+            <column name="state" type="user_state" defaultValue="PENDING">
                 <constraints nullable="false" />
             </column>
         </createTable>

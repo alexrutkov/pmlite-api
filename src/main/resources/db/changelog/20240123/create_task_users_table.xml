@@ -10,7 +10,7 @@
             <column name="user_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="agreement_state" type="varchar(20)" defaultValue="PENDING">
+            <column name="agreement_state" type="agreement_state" defaultValue="PENDING">
                 <constraints nullable="false"/>
             </column>
             <column name="role" type="varchar(20)" defaultValue="EMPLOYEE">

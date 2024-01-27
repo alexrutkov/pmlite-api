@@ -16,7 +16,7 @@
             <column name="description" type="TEXT" defaultValue="">
                 <constraints nullable="false" />
             </column>
-            <column name="agreement_state" type="varchar(20)" defaultValue="PENDING">
+            <column name="agreement_state" type="agreement_state" defaultValue="PENDING">
                 <constraints nullable="false"/>
             </column>
             <column name="parent_id" type="bigint">

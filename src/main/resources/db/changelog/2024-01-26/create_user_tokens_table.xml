@@ -1,0 +1,31 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="2024-01-20_create_user_tokens" author="alur">
+        <createTable tableName="user_tokens">
+            <column name="id" type="uuid" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+            <column name="expired_at" type="timestamptz">
+                <constraints nullable="false" />
+            </column>
+            <column name="state" type="user_token_state" defaultValue="PENDING">
+                <constraints nullable="false" />
+            </column>
+            <column name="type" type="user_token_type">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_user_token_users"
+                                 baseTableName="user_tokens" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+    </changeSet>
+</databaseChangeLog>

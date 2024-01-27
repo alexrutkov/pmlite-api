@@ -2,12 +2,21 @@ app:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
     validity-in-ms: P7D
-  recapture:
-    secret-key: ${RECAPTURE_SECRET_KEY}
+  recaptcha:
+    default:
+      secret-key: ${DEFAULT_RECAPTCHA_SECRET_KEY}
+    invisible:
+      secret-key: ${INVISIBLE_RECAPTCHA_SECRET_KEY}
+  website:
+    url: ${WEBSITE_URL}
 
 spring:
   application:
     name: pmlite-api
+  task:
+    execution:
+      pool:
+        max-size: 16
   liquibase:
     change-log: classpath:db/changelog/db.changelog.master.xml
     user: ${SPRING_DATASOURCE_USERNAME}
@@ -31,6 +40,7 @@ spring:
 server:
   error:
     include-message: always
+    include-stacktrace: never
 
 #logging:
 #  level:

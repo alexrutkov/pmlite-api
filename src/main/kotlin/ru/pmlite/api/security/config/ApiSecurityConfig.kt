@@ -48,6 +48,7 @@ class ApiSecurityConfig {
                 requests
                     .requestMatchers(HttpMethod.POST, "/api/registration/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/authorization/createToken").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/authorization/validateUserToken").permitAll()
                     .requestMatchers("/error").permitAll()
 
                     .requestMatchers("/api/authorization/isAuthorized").authenticated()

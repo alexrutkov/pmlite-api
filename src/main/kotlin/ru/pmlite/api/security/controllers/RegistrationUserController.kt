@@ -12,16 +12,16 @@ import ru.pmlite.api.security.dto.RegistrationCommand
 import ru.pmlite.api.security.dto.ValidateEmailCommand
 import ru.pmlite.api.security.providers.JwtTokenProvider
 import ru.pmlite.api.security.services.RegistrationService
+import ru.pmlite.api.security.validators.DefaultRecaptchaValidator
 import ru.pmlite.api.security.validators.DtoValidator
 import ru.pmlite.api.security.validators.EmailValidator
-import ru.pmlite.api.security.validators.RecaptureValidator
 
 private val logger = KotlinLogging.logger {}
 @RestController
 @RequestMapping("/api/registration")
 class RegistrationUserController(
     private val emailValidator: EmailValidator,
-    private val recaptureValidator: RecaptureValidator,
+    private val recaptchaValidator: DefaultRecaptchaValidator,
     private val dtoValidator: DtoValidator,
     private val registrationService: RegistrationService,
     private val jwtTokenProvider: JwtTokenProvider,
@@ -38,7 +38,7 @@ class RegistrationUserController(
         response: HttpServletResponse
     ) {
         dtoValidator.validate(result)
-        recaptureValidator.validate(command.recaptcha)
+        recaptchaValidator.validate(command.recaptcha)
         emailValidator.validate(ValidateEmailCommand(command.email))
 
         registrationService.register(command)
