@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 import ru.pmlite.api.email.dto.CreateUserTokenCommand
 import ru.pmlite.api.email.dto.SendEmailCommand
 import ru.pmlite.api.email.event.UserCreatedEvent
+import ru.pmlite.api.email.event.UserRecoveryRequestEvent
 import ru.pmlite.api.email.services.EmailService
 import ru.pmlite.api.security.domain.UserTokenType
 import ru.pmlite.api.security.repositories.UserTokenRepository
@@ -33,10 +34,28 @@ class UserEmailValidationListener(
             event.email,
             """
                 ${event.name}!
-                Прошу подтвердить адрес электронной почты по ссылке
+                Прошу подтвердить адрес электронной почты по ссылке:
                 $websiteUrl/registration/confirm/${token}
             """.trimIndent(),
             "Проверка почтового ящика"
+        ).also(emailService::sendEmail)
+    }
+
+    @Transactional @Async
+    @EventListener(UserRecoveryRequestEvent::class)
+    fun createValidateEmailMessage(event: UserRecoveryRequestEvent) {
+        val token = CreateUserTokenCommand(
+            event.userId, UserTokenType.RECOVERY, LocalDateTime.now().plusDays(7)
+        ).let(userTokenRepository::createTokenBy)
+
+        SendEmailCommand(
+            event.email,
+            """
+                ${event.name}!
+                Для восстановления доступа к личному кабинету пройдите по ссылке:
+                $websiteUrl/registration/confirm/${token}
+            """.trimIndent(),
+            "Восстановление доступа к личному кабинету"
         ).also(emailService::sendEmail)
     }
 }

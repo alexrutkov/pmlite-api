@@ -16,6 +16,6 @@ class AuthenticationUserService(
     override fun loadUserByUsername(username: String): UserDetails {
         val user = this.userAuthenticatedRepository.findByEmail(username)
             ?: throw UsernameNotFoundException("Пользователь $username не найден!")
-        return User(user.id.toString(), user.password, listOf(SimpleGrantedAuthority(UserRole.ROLE_USER.name)))
+        return User(user.userId.id.toString(), user.password, listOf(SimpleGrantedAuthority(UserRole.ROLE_USER.name)))
     }
 }

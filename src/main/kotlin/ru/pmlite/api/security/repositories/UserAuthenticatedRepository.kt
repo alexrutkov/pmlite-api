@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository
 import ru.pmlite.api.security.domain.UserState
 import ru.pmlite.api.security.dto.RegistrationCommand
 import ru.pmlite.api.security.dto.UserAuthenticatedDetails
+import ru.pmlite.api.security.dto.UserDetails
 import ru.pmlite.api.values.UserId
 
 @Repository
@@ -57,11 +58,52 @@ class UserAuthenticatedRepository(
             )
     }
 
+    fun getUserDetailsById(userId: UserId): UserDetails {
+        return runCatching {
+            jdbcTemplate.queryForObject("""
+            select id, email, name, updated_at from users where id = :id
+        """.trimIndent(),
+                MapSqlParameterSource("id", userId.id),
+                mapUserShortDetails
+            )!!
+        }.getOrThrow()
+    }
+
+    fun updatePassword(userId: UserId, passwordEncoded: String) {
+        jdbcTemplate.update(
+            """
+            update users set password = :password, updated_at = now() where id = :id
+        """.trimIndent(),
+            MapSqlParameterSource("id", userId.id)
+                .addValue("password", passwordEncoded)
+        )
+    }
+
+    fun findUserDetailsByEmail(email: String): UserDetails {
+        return runCatching {
+            jdbcTemplate.queryForObject("""
+            select id, email, name, updated_at from users where email = :email
+        """.trimIndent(),
+                MapSqlParameterSource("email", email),
+                mapUserShortDetails
+            )!!
+        }.getOrThrow()
+    }
+
     private val mapUserDetails = RowMapper<UserAuthenticatedDetails> { rs, _ ->
         UserAuthenticatedDetails(
             rs.getString("email"),
             rs.getString("password"),
-            rs.getLong("id")
+            rs.getLong("id").let(::UserId)
+        )
+    }
+
+    private val mapUserShortDetails = RowMapper<UserDetails> { rs, _ ->
+        UserDetails(
+            rs.getLong("id").let(::UserId),
+            rs.getString("name"),
+            rs.getString("email"),
+            rs.getTimestamp("updated_at").toInstant()
         )
     }
 }

@@ -28,7 +28,7 @@ class RegistrationUserController(
 ) {
 
     @PostMapping("validateEmail")
-    fun validateEmail(@RequestBody command: ValidateEmailCommand) = emailValidator.validate(command)
+    fun validateEmail(@RequestBody command: ValidateEmailCommand) = emailValidator.notExistsValidate(command.email)
 
 
     @PostMapping
@@ -39,7 +39,7 @@ class RegistrationUserController(
     ) {
         dtoValidator.validate(result)
         recaptchaValidator.validate(command.recaptcha)
-        emailValidator.validate(ValidateEmailCommand(command.email))
+        emailValidator.notExistsValidate(command.email)
 
         registrationService.register(command)
             .let(jwtTokenProvider::createTokenByAuthentication)

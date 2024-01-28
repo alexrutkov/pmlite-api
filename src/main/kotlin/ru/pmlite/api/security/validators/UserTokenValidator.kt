@@ -4,7 +4,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import ru.pmlite.api.security.domain.UserToken
 import ru.pmlite.api.security.domain.UserTokenState
-import ru.pmlite.api.security.domain.UserTokenType
 import ru.pmlite.api.security.dto.ValidateResult
 import ru.pmlite.api.security.events.ConfirmedEmailEvent
 import ru.pmlite.api.security.events.ExpiredTokenEvent
@@ -20,18 +19,19 @@ class UserTokenValidator(
     fun validate(token: UUID): ValidateResult {
         return userTokenRepository.findTokenBy(token)
             ?.also(::checkExpiredState)
+            ?.also(::checkEmailValidation)
             ?.takeIf(UserToken::isValid)
-            ?.also {
-                if (it.type == UserTokenType.EMAIL_VALIDATION) {
-                    publisher.publishEvent(ConfirmedEmailEvent(it.userId))
-                }
-            }
+
             ?.let { ValidateResult(true) }
             ?: throw UserTokenValidException("Токен недействителен")
     }
 
+    private fun checkEmailValidation(token: UserToken) {
+        publisher.publishEvent(ConfirmedEmailEvent(token.userId))
+    }
+
     private fun checkExpiredState(token: UserToken) {
-        if (token.isExpired && token.state != UserTokenState.EXPIRED)
+        if (token.isExpired && token.state == UserTokenState.PENDING)
             publisher.publishEvent(ExpiredTokenEvent(token.tokenId))
     }
 }

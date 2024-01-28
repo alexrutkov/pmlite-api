@@ -30,6 +30,9 @@
             <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
             <column name="state" type="user_state" defaultValue="PENDING">
                 <constraints nullable="false" />
             </column>

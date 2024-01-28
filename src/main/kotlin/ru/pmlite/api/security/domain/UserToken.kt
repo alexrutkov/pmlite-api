@@ -11,6 +11,6 @@ data class UserToken(
     val tokenId: TokenId,
     val userId: UserId
 ) {
-    val isValid get() = expiredAt < Instant.now()
-    val isExpired get() = expiredAt > Instant.now()
+    val isValid get() = expiredAt > Instant.now() && state == UserTokenState.PENDING
+    val isExpired get() = expiredAt < Instant.now()
 }
