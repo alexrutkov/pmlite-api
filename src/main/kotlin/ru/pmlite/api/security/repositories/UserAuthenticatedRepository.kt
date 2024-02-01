@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
+import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.security.domain.UserState
 import ru.pmlite.api.security.dto.RegistrationCommand
 import ru.pmlite.api.security.dto.UserAuthenticatedDetails
@@ -88,6 +89,14 @@ class UserAuthenticatedRepository(
                 mapUserShortDetails
             )!!
         }.getOrThrow()
+    }
+
+    fun gelRolesByUser(userId: UserId): List<UserRole> {
+        return jdbcTemplate.query("""
+            select role from user_roles where user_id = :id
+        """.trimIndent(), MapSqlParameterSource("id", userId.id)) {rs, _ ->
+            rs.getString("role").let(UserRole::valueOf)
+        }
     }
 
     private val mapUserDetails = RowMapper<UserAuthenticatedDetails> { rs, _ ->

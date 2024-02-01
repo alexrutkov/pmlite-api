@@ -8,6 +8,7 @@ import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
 import ru.pmlite.api.tasks.repositories.TaskRepository
+import ru.pmlite.api.values.TaskId
 
 private val logger = KotlinLogging.logger {}
 @Service
@@ -18,10 +19,12 @@ class TaskService(
     @Transactional
     fun createTask(command: CreateTaskCommand) {
         repository.createTask(command)
-            .also { taskId ->
-                repository.addUserRole(
-                    TaskUserRoleDto(taskId, securityService.userId, UserTaskRole.OWNER)
-                )
-            }
+            .also(::addOwnerUser)
+    }
+
+    private fun addOwnerUser(taskId: TaskId) {
+        repository.addUserRole(
+            TaskUserRoleDto(taskId, securityService.userId, UserTaskRole.OWNER)
+        )
     }
 }

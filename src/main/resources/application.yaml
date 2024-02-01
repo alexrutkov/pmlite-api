@@ -1,7 +1,7 @@
 app:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
-    validity-in-ms: P7D
+    validity-in-ms: P365D
   recaptcha:
     default:
       secret-key: ${DEFAULT_RECAPTCHA_SECRET_KEY}

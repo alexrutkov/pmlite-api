@@ -1,26 +1,27 @@
 package ru.pmlite.api.tasks.controllers
 
 import jakarta.validation.Valid
-import mu.KotlinLogging
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import ru.pmlite.api.tasks.dto.CreateRootTaskCommand
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.services.TaskService
 
-private val logger = KotlinLogging.logger {}
-@RequestMapping("/api/tasks")
+
+@PreAuthorize("hasRole('TASK_CREATOR')")
 @RestController
-class TaskController(
+@RequestMapping("/api/tasks")
+class CreatorsTaskController(
     private val service: TaskService
 ) {
 
-    @PostMapping
-    fun createTask(
-        @Valid @RequestBody command: CreateTaskCommand
+    @PostMapping("createRootTask")
+    fun createRootTask(
+        @Valid @RequestBody command: CreateRootTaskCommand
     ) {
-        service.createTask(command)
+        service.createTask(CreateTaskCommand(command.name, command.shortDescription))
     }
-
 }

@@ -21,6 +21,7 @@
     <include file="20240123/create_user_tags_table.xml" relativeToChangelogFile="true" />
 
     <include file="2024-01-26/create_user_tokens_table.xml" relativeToChangelogFile="true" />
+    <include file="2024-01-28/create_user_roles_table.xml" relativeToChangelogFile="true" />
 
 
 </databaseChangeLog>
