@@ -2,7 +2,15 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="20240123_create_task_users" author="alur">
+    <changeSet id="create_task_users" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="task_users"/>
+            </not>
+        </preConditions>
+        <sql>
+            create type task_user_role as enum ('EMPLOYEE', 'CHIEF', 'OWNER');
+        </sql>
         <createTable tableName="task_users" >
             <column name="task_id" type="bigint">
                 <constraints nullable="false" />
@@ -10,10 +18,10 @@
             <column name="user_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="agreement_state" type="agreement_state" defaultValue="PENDING">
+            <column name="agreement_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="role" type="varchar(20)" defaultValue="EMPLOYEE">
+            <column name="role" type="task_user_role" defaultValue="EMPLOYEE">
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamptz" defaultValueComputed="now()">
@@ -27,6 +35,10 @@
         <addForeignKeyConstraint constraintName="fk_users_task_users"
                                  baseTableName="task_users" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_agreements_task_users"
+                                 baseTableName="task_users" baseColumnNames="agreement_id"
+                                 referencedTableName="agreements" referencedColumnNames="id"
         />
     </changeSet>
 </databaseChangeLog>

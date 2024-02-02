@@ -2,9 +2,9 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="20240123_create_task_tags" author="alur">
-        <createTable tableName="task_tags" >
-            <column name="task_id" type="bigint">
+    <changeSet id="create_user_tags" author="alur">
+        <createTable tableName="user_tags" >
+            <column name="user_id" type="bigint">
                 <constraints nullable="false" />
             </column>
             <column name="tag_id" type="bigint">
@@ -14,12 +14,12 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addForeignKeyConstraint constraintName="fk_tasks_task_tags"
-                                 baseTableName="task_tags" baseColumnNames="task_id"
-                                 referencedTableName="tasks" referencedColumnNames="id"
+        <addForeignKeyConstraint constraintName="fk_users_user_tags"
+                                 baseTableName="user_tags" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
         />
-        <addForeignKeyConstraint constraintName="fk_tags_task_tags"
-                                 baseTableName="task_tags" baseColumnNames="tag_id"
+        <addForeignKeyConstraint constraintName="fk_tags_user_tags"
+                                 baseTableName="user_tags" baseColumnNames="tag_id"
                                  referencedTableName="tags" referencedColumnNames="id"
         />
     </changeSet>

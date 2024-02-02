@@ -1,11 +1,20 @@
 package ru.pmlite.api.tasks.services
 
 import mu.KotlinLogging
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import ru.pmlite.api.aggreements.domains.AgreementType
+import ru.pmlite.api.aggreements.domains.Decision
+import ru.pmlite.api.aggreements.domains.DecisionMode
+import ru.pmlite.api.aggreements.dto.DecisionCommand
+import ru.pmlite.api.aggreements.services.AgreementService
+import ru.pmlite.api.aggreements.services.DecisionService
 import ru.pmlite.api.security.services.SecurityService
+import ru.pmlite.api.tasks.domain.TaskDetails
 import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
+import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
 import ru.pmlite.api.tasks.repositories.TaskRepository
 import ru.pmlite.api.values.TaskId
@@ -14,17 +23,46 @@ private val logger = KotlinLogging.logger {}
 @Service
 class TaskService(
     private val securityService: SecurityService,
+    private val agreementService: AgreementService,
+    private val decisionService: DecisionService,
     private val repository: TaskRepository
 ) {
     @Transactional
     fun createTask(command: CreateTaskCommand) {
-        repository.createTask(command)
+        val agreementId = agreementService.createAgreement(AgreementType.TASK)
+        repository.createTask(command, agreementId)
+            .also(::addOwnerUser)
+    }
+    @Transactional
+    fun createRootTask(command: CreateTaskCommand) {
+        val agreementId = agreementService.createAgreement(AgreementType.TASK)
+        DecisionCommand(agreementId, Decision.APPROVE, DecisionMode.AUTO)
+            .also(decisionService::decide)
+        repository.createTask(command, agreementId)
             .also(::addOwnerUser)
     }
 
     private fun addOwnerUser(taskId: TaskId) {
+        val agreementId = agreementService.createAgreement(AgreementType.TASK_USER)
         repository.addUserRole(
-            TaskUserRoleDto(taskId, securityService.userId, UserTaskRole.OWNER)
+            TaskUserRoleDto(taskId, securityService.userId, UserTaskRole.OWNER, agreementId)
         )
+        DecisionCommand(agreementId, Decision.APPROVE, DecisionMode.AUTO)
+            .also(decisionService::decide)
+
     }
+
+    fun getAllTasks(pageable: Pageable): List<TaskSummary> {
+        return repository.getAllTasks(pageable)
+    }
+
+    fun getMyTasks(pageable: Pageable): Any {
+        return repository.getMyTasks(securityService.userId, pageable)
+    }
+
+    fun getTask(id: TaskId): TaskDetails {
+        return repository.getTask(id)
+    }
+
+
 }

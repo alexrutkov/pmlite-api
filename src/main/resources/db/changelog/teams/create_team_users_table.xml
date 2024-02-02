@@ -1,0 +1,44 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_team_users" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="team_users"/>
+            </not>
+        </preConditions>
+        <sql>
+            create type task_team_role as enum ('EMPLOYEE', 'CHIEF');
+        </sql>
+        <createTable tableName="team_users" >
+            <column name="team_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="agreement_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="task_team_role" defaultValue="EMPLOYEE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_teams_team_users"
+                                 baseTableName="team_users" baseColumnNames="team_id"
+                                 referencedTableName="teams" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_users_team_users"
+                                 baseTableName="team_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_agreements_team_users"
+                                 baseTableName="team_users" baseColumnNames="agreement_id"
+                                 referencedTableName="agreements" referencedColumnNames="id"
+        />
+    </changeSet>
+</databaseChangeLog>

@@ -2,33 +2,35 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="2024-01-28_create_user_roles" author="alur">
+    <changeSet id="create_agreements" author="alur">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="user_roles"/>
+                <tableExists tableName="agreements"/>
             </not>
         </preConditions>
         <sql>
-            create type user_role as enum (
-                'ROLE_USER', 'ROLE_AGREEMENT_TAG', 'ROLE_ADMIN', 'ROLE_TASK_CREATOR'
-                );
+            create type agreement_state as enum ('PENDING', 'APPROVED', 'DECLINED');
+            create type agreement_type as enum ('TASK', 'TAG', 'TASK_USER', 'TASK_TEAM', 'TEAM_USER');
         </sql>
-        <createTable tableName="user_roles">
-            <column name="id" type="serial" autoIncrement="true">
+        <createTable tableName="agreements">
+            <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="user_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="role" type="user_role">
-                <constraints nullable="false" />
+            <column name="state" type="agreement_state" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="agreement_type">
+                <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addForeignKeyConstraint constraintName="fk_user_roles_users"
-                                 baseTableName="user_roles" baseColumnNames="user_id"
+        <addForeignKeyConstraint constraintName="fk_agreements_users"
+                                 baseTableName="agreements" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"
         />
     </changeSet>

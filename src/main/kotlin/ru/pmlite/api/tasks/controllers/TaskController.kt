@@ -1,15 +1,12 @@
 package ru.pmlite.api.tasks.controllers
 
 import jakarta.validation.Valid
-import mu.KotlinLogging
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.data.domain.Pageable
+import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.services.TaskService
+import ru.pmlite.api.values.TaskId
 
-private val logger = KotlinLogging.logger {}
 @RequestMapping("/api/tasks")
 @RestController
 class TaskController(
@@ -17,10 +14,16 @@ class TaskController(
 ) {
 
     @PostMapping
-    fun createTask(
-        @Valid @RequestBody command: CreateTaskCommand
-    ) {
-        service.createTask(command)
-    }
+    fun createTask(@Valid @RequestBody command: CreateTaskCommand) = service.createTask(command)
+
+    @GetMapping("all")
+    fun getAllTasks(pageable: Pageable) = service.getAllTasks(pageable)
+
+    @GetMapping("my")
+    fun getMyTasks(pageable: Pageable) = service.getMyTasks(pageable)
+
+    @GetMapping("{id}")
+    fun getTask(@PathVariable id: TaskId) = service.getTask(id)
+
 
 }

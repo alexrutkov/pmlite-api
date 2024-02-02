@@ -2,7 +2,12 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="2024-01-20_create_user_tokens" author="alur">
+    <changeSet id="create_user_tokens" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_tokens"/>
+            </not>
+        </preConditions>
         <createTable tableName="user_tokens">
             <column name="id" type="uuid" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false" />

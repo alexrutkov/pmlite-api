@@ -1,0 +1,47 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_decisions" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="decisions"/>
+            </not>
+        </preConditions>
+        <sql>
+            create type decision_mode as enum ('MANUAL', 'AUTO');
+            create type decision as enum ('APPROVE', 'DECLINE');
+        </sql>
+        <createTable tableName="decisions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="agreement_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mode" type="decision_mode" defaultValue="MANUAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="decision" type="decision">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="comment" type="varchar(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_decisions_users"
+                                 baseTableName="decisions" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_decisions_agreements"
+                                 baseTableName="decisions" baseColumnNames="agreement_id"
+                                 referencedTableName="agreements" referencedColumnNames="id"
+        />
+    </changeSet>
+</databaseChangeLog>

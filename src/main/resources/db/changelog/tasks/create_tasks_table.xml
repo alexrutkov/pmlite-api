@@ -1,0 +1,43 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_tasks" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tasks"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tasks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="name" type="varchar(255)" defaultValue="">
+                <constraints nullable="false" />
+            </column>
+            <column name="short_description" type="varchar(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT" defaultValue="">
+                <constraints nullable="false" />
+            </column>
+            <column name="agreement_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="ltree">
+                <constraints nullable="true" />
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_agreements_tasks"
+                                 baseTableName="tasks" baseColumnNames="agreement_id"
+                                 referencedTableName="agreements" referencedColumnNames="id"
+        />
+
+        <sql>
+            CREATE INDEX tasks_path_idx ON tasks USING GIST (path)
+        </sql>
+    </changeSet>
+</databaseChangeLog>

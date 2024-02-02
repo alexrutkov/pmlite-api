@@ -3,25 +3,26 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <include file="2024-01-26/create_user_token_state_enum.xml" relativeToChangelogFile="true" />
-    <include file="2024-01-26/create_agreement_state_enum.xml" relativeToChangelogFile="true" />
+    <include file="users/create_user_token_state_enum.xml" relativeToChangelogFile="true" />
+    <include file="agreements/create_agreements_table.xml" relativeToChangelogFile="true" />
+    <include file="agreements/create_decisions_table.xml" relativeToChangelogFile="true" />
 
-    <include file="20240120/create_users_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_tasks_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_teams_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_tags_table.xml" relativeToChangelogFile="true" />
+    <include file="users/create_users_table.xml" relativeToChangelogFile="true" />
+    <include file="tasks/create_tasks_table.xml" relativeToChangelogFile="true" />
+    <include file="teams/create_teams_table.xml" relativeToChangelogFile="true" />
+    <include file="tags/create_tags_table.xml" relativeToChangelogFile="true" />
 
-    <include file="20240123/create_task_tags_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_task_teams_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_task_users_table.xml" relativeToChangelogFile="true" />
+    <include file="tasks/create_task_tags_table.xml" relativeToChangelogFile="true" />
+    <include file="tasks/create_task_teams_table.xml" relativeToChangelogFile="true" />
+    <include file="tasks/create_task_users_table.xml" relativeToChangelogFile="true" />
 
-    <include file="20240123/create_team_users_table.xml" relativeToChangelogFile="true" />
-    <include file="20240123/create_team_tags_table.xml" relativeToChangelogFile="true" />
+    <include file="teams/create_team_users_table.xml" relativeToChangelogFile="true" />
+    <include file="teams/create_team_tags_table.xml" relativeToChangelogFile="true" />
 
-    <include file="20240123/create_user_tags_table.xml" relativeToChangelogFile="true" />
+    <include file="users/create_user_tags_table.xml" relativeToChangelogFile="true" />
 
-    <include file="2024-01-26/create_user_tokens_table.xml" relativeToChangelogFile="true" />
-    <include file="2024-01-28/create_user_roles_table.xml" relativeToChangelogFile="true" />
+    <include file="users/create_user_tokens_table.xml" relativeToChangelogFile="true" />
+    <include file="users/create_user_roles_table.xml" relativeToChangelogFile="true" />
 
 
 </databaseChangeLog>

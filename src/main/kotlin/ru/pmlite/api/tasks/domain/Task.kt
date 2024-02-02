@@ -1,11 +1,7 @@
 package ru.pmlite.api.tasks.domain
 
+import ru.pmlite.api.users.domain.UserSummary
 import java.time.Instant
-
-data class User(
-    val id: Long,
-    val name: String,
-)
 
 enum class UserTeamRole {
     EMPLOYEE, CHIEF
@@ -22,7 +18,7 @@ data class Team(
 }
 
 data class TeamUser(
-    val user: User,
+    val user: UserSummary,
     val role: UserTeamRole
 )
 
@@ -38,7 +34,3 @@ data class Task(
     val users: Set<TaskUser> = emptySet()
 }
 
-data class TaskUser(
-    val user: User,
-    val role: UserTaskRole
-)

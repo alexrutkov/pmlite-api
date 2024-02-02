@@ -22,6 +22,6 @@ class CreatorsTaskController(
     fun createRootTask(
         @Valid @RequestBody command: CreateRootTaskCommand
     ) {
-        service.createTask(CreateTaskCommand(command.name, command.shortDescription))
+        service.createRootTask(CreateTaskCommand(command.name, command.shortDescription))
     }
 }

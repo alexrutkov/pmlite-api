@@ -2,7 +2,12 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="2024-01-26_create_user_token_state_enum" author="alur">
+    <changeSet id="create_user_token_state_enum" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from pg_type where typname = 'user_token_state'
+            </sqlCheck>
+        </preConditions>
         <sql>
             create type user_token_state as enum ('PENDING', 'CONFIRMED', 'EXPIRED');
             create type user_token_type as enum ('EMAIL_VALIDATION', 'RECOVERY');

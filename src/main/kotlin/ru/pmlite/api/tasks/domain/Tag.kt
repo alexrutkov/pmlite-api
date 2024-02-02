@@ -1,10 +1,8 @@
 package ru.pmlite.api.tasks.domain
 
+import ru.pmlite.api.aggreements.domains.AgreementState
 import java.time.Instant
 
-enum class AgreementState {
-    APPROVED, DECLINED, PENDING
-}
 data class Tag(
     val id: Long,
     val name: String,
