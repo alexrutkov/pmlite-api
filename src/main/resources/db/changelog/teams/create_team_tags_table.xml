@@ -22,5 +22,7 @@
                                  baseTableName="team_tags" baseColumnNames="tag_id"
                                  referencedTableName="tags" referencedColumnNames="id"
         />
+        <addUniqueConstraint tableName="team_tags" columnNames="team_id, tag_id"/>
+
     </changeSet>
 </databaseChangeLog>

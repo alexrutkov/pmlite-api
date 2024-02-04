@@ -3,11 +3,16 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="create_tags" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tags"/>
+            </not>
+        </preConditions>
         <createTable tableName="tags">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="name" type="varchar(255)">
+            <column name="tag" type="varchar(35)">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="agreement_id" type="bigint">
@@ -21,5 +26,8 @@
                                  baseTableName="tags" baseColumnNames="agreement_id"
                                  referencedTableName="agreements" referencedColumnNames="id"
         />
+        <sql>
+            CREATE INDEX tabs_tag_idx ON tags (tag varchar_pattern_ops)
+        </sql>
     </changeSet>
 </databaseChangeLog>

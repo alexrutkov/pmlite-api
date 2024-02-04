@@ -22,5 +22,6 @@
                                  baseTableName="task_tags" baseColumnNames="tag_id"
                                  referencedTableName="tags" referencedColumnNames="id"
         />
+        <addUniqueConstraint tableName="task_tags" columnNames="task_id, tag_id"/>
     </changeSet>
 </databaseChangeLog>

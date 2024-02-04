@@ -6,15 +6,20 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
+import ru.pmlite.api.aggreements.domains.AgreementState
+import ru.pmlite.api.tags.domains.Tag
+import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.tasks.domain.TaskDetails
 import ru.pmlite.api.tasks.domain.TaskUser
 import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
+import ru.pmlite.api.tasks.dto.UpdateTaskCommand
 import ru.pmlite.api.tasks.exceptions.TaskNotFoundExceptions
 import ru.pmlite.api.users.domain.UserSummary
 import ru.pmlite.api.values.AgreementId
+import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.UserId
 
@@ -31,8 +36,16 @@ class TaskRepository(
                 (
                     CASE
                         WHEN cast(:parentId as text) is not null 
-                        THEN (select text2ltree(concat_ws('.', t.path, cast(:parentId as text))) from tasks t where t.id = :parentId)
-                        ELSE :parentId
+                        THEN (
+                            select text2ltree(
+                                concat_ws(
+                                    '.',
+                                    coalesce(t.path::text, t.id::text)::text,
+                                    cast(:parentId as text)
+                                )::text
+                            ) from tasks t where t.id = :parentId
+                        )
+                        ELSE cast(:parentId as text)::ltree
                     END
                 )
             ) returning id
@@ -94,9 +107,25 @@ class TaskRepository(
     fun getTask(id: TaskId): TaskDetails {
         val taskSummary = getTaskSummary(id)
         val userRelations = getUserRelation(id)
+        val tags = getTags(id)
         return TaskDetails(
-            taskSummary, userRelations
+            taskSummary, userRelations, tags
         )
+    }
+
+    private fun getTags(taskId: TaskId): List<TagDetails> {
+        return jdbcTemplate.query("""
+            select t.tag, t.id, a.state from task_tags tt 
+            join tags t on tt.tag_id = t.id
+            join agreements a on t.agreement_id = a.id
+            where task_id = :id
+        """.trimIndent(), mapOf("id" to taskId.id)) { rs, _ ->
+            TagDetails(
+                TagId(rs.getLong("id")),
+                rs.getString("tag"),
+                AgreementState.valueOf(rs.getString("state"))
+            )
+        }
     }
 
     private fun getUserRelation(taskId: TaskId): List<TaskUser> {
@@ -123,6 +152,42 @@ class TaskRepository(
                 mapTaskSummary
             )
         }.getOrNull() ?: throw TaskNotFoundExceptions()
+    }
+
+    fun updateTask(taskId: TaskId, command: UpdateTaskCommand) {
+        jdbcTemplate.update("""
+            update tasks set 
+                name = :name,
+                short_description = :shortDescription 
+            where id = :id
+        """.trimIndent(),
+            mapOf(
+                "id" to taskId.id,
+                "name" to command.name,
+                "shortDescription" to command.shortDescription
+            )
+        )
+    }
+
+    fun addTaskTags(taskId: TaskId, tags: List<Tag>) {
+        jdbcTemplate.batchUpdate("""
+            insert into task_tags (task_id, tag_id) 
+            values (:id, :tagId)
+            on conflict do nothing 
+        """.trimIndent(),
+            tags.map {
+                MapSqlParameterSource("id", taskId.id)
+                    .addValue("tagId", it.tagId.id)
+            }.toTypedArray()
+        )
+    }
+
+    fun deleteTaskTag(taskId: TaskId, tagId: TagId) {
+        jdbcTemplate.update("""
+            delete from task_tags where task_id = :id and tag_id = :tagId
+        """.trimIndent(),
+            mapOf("id" to taskId.id, "tagId" to tagId.id)
+            )
     }
 
     private val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->

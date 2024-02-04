@@ -31,5 +31,7 @@
                                  baseTableName="user_roles" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"
         />
+        <addUniqueConstraint tableName="user_roles" columnNames="user_id, role"/>
+
     </changeSet>
 </databaseChangeLog>

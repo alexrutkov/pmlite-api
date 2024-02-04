@@ -40,5 +40,7 @@
                                  baseTableName="team_users" baseColumnNames="agreement_id"
                                  referencedTableName="agreements" referencedColumnNames="id"
         />
+        <addUniqueConstraint tableName="team_users" columnNames="team_id, user_id"/>
+
     </changeSet>
 </databaseChangeLog>

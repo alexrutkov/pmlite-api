@@ -16,7 +16,10 @@ import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
+import ru.pmlite.api.tasks.dto.UpdateTaskCommand
 import ru.pmlite.api.tasks.repositories.TaskRepository
+import ru.pmlite.api.values.AgreementId
+import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TaskId
 
 private val logger = KotlinLogging.logger {}
@@ -30,16 +33,23 @@ class TaskService(
     @Transactional
     fun createTask(command: CreateTaskCommand) {
         val agreementId = agreementService.createAgreement(AgreementType.TASK)
-        repository.createTask(command, agreementId)
-            .also(::addOwnerUser)
+        addTask(command, agreementId)
     }
     @Transactional
     fun createRootTask(command: CreateTaskCommand) {
         val agreementId = agreementService.createAgreement(AgreementType.TASK)
         DecisionCommand(agreementId, Decision.APPROVE, DecisionMode.AUTO)
             .also(decisionService::decide)
+        addTask(command, agreementId)
+    }
+
+    private fun addTask(
+        command: CreateTaskCommand,
+        agreementId: AgreementId
+    ) {
         repository.createTask(command, agreementId)
             .also(::addOwnerUser)
+            .also { repository.addTaskTags(it, command.tags) }
     }
 
     private fun addOwnerUser(taskId: TaskId) {
@@ -56,12 +66,22 @@ class TaskService(
         return repository.getAllTasks(pageable)
     }
 
-    fun getMyTasks(pageable: Pageable): Any {
+    fun getMyTasks(pageable: Pageable): List<TaskSummary>  {
         return repository.getMyTasks(securityService.userId, pageable)
     }
 
     fun getTask(id: TaskId): TaskDetails {
         return repository.getTask(id)
+    }
+
+    @Transactional
+    fun updateTask(taskId: TaskId, command: UpdateTaskCommand) {
+        this.repository.updateTask(taskId, command)
+        repository.addTaskTags(taskId, command.tags)
+    }
+
+    fun deleteTaskTag(taskId: TaskId, tagId: TagId) {
+        repository.deleteTaskTag(taskId, tagId)
     }
 
 

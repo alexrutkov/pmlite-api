@@ -1,5 +1,6 @@
 package ru.pmlite.api.tasks.domain
 
+import ru.pmlite.api.tags.domains.Tag
 import ru.pmlite.api.users.domain.UserSummary
 import java.time.Instant
 
