@@ -33,6 +33,7 @@ class ApiSecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .csrf {
                 it
+                    .ignoringRequestMatchers("/websocketApp/**")
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler().apply { setCsrfRequestAttributeName(null) })
             }

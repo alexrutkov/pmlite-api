@@ -9,6 +9,11 @@ app:
       secret-key: ${INVISIBLE_RECAPTCHA_SECRET_KEY}
   website:
     url: ${WEBSITE_URL}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    user: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
 
 spring:
   application:
@@ -44,4 +49,15 @@ server:
 
 #logging:
 #  level:
-#    org.springframework.security: DEBUG
+#    org.springframework.security: TRACE
+#    org.springframework.security.messaging.web.socket: TRACE
+#    org.springframework.web.socket.server: TRACE
+#
+#    org:
+#      springframework:
+#        security:
+#          web:
+#            csrf: TRACE
+#    root: debug
+
+

@@ -190,6 +190,16 @@ class TaskRepository(
             )
     }
 
+    fun changeUserRole(taskId: TaskId, userId: UserId, role: UserTaskRole) {
+        jdbcTemplate.update("""
+            update task_users set role = :role::task_user_role where task_id = :taskId and user_id = :userId
+        """.trimIndent(),
+            MapSqlParameterSource("taskId", taskId.id)
+                .addValue("userId", userId.id)
+                .addValue("role", role.name)
+            )
+    }
+
     private val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
         TaskSummary(
             rs.getLong("id").let(::TaskId),

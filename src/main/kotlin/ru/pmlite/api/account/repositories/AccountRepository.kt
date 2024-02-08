@@ -4,7 +4,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import ru.pmlite.api.account.dto.AccountDetails
+import ru.pmlite.api.account.dto.AccountTaskRole
 import ru.pmlite.api.security.domain.UserRole
+import ru.pmlite.api.tasks.domain.UserTaskRole
+import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.UserId
 
 @Repository
@@ -19,7 +22,7 @@ class AccountRepository(
                 from users where id = :id
             """.trimIndent(), MapSqlParameterSource("id", userId.id)) {rs, _ ->
                 AccountDetails(
-                    userId, rs.getString("name")
+                    userId.id, rs.getString("name")
                 )
             }!!
         }.getOrThrow()
@@ -30,6 +33,17 @@ class AccountRepository(
             select role from user_roles where user_id = :id
         """.trimIndent(), MapSqlParameterSource("id", userId.id)) {rs, _ ->
             rs.getString("role").let(UserRole::valueOf)
+        }
+    }
+
+    fun getAccountTaskRoles(userId: UserId): List<AccountTaskRole> {
+        return jdbcTemplate.query("""
+            select task_id, role from task_users where user_id = :id
+        """.trimIndent(), MapSqlParameterSource("id", userId.id)) { rs, _ ->
+            AccountTaskRole(
+                TaskId(rs.getLong("task_id")),
+                UserTaskRole.valueOf(rs.getString("role"))
+            )
         }
     }
 }

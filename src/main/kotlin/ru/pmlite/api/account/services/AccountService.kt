@@ -11,7 +11,10 @@ class AccountService(
 ) {
     fun getAccountDetails(userId: UserId): AccountDetails {
         return repository.getAccountDetails(userId)
-            .copy(roles = repository.getAccountRoles(userId))
+            .copy(
+                roles = repository.getAccountRoles(userId),
+                taskRoles = repository.getAccountTaskRoles(userId)
+            )
     }
 
 
