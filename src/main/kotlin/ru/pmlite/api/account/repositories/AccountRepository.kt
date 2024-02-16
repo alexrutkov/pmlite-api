@@ -38,7 +38,10 @@ class AccountRepository(
 
     fun getAccountTaskRoles(userId: UserId): List<AccountTaskRole> {
         return jdbcTemplate.query("""
-            select task_id, role from task_users where user_id = :id
+            select 
+                task_id, role 
+            from task_users t join agreements a on t.agreement_id = a.id
+            where t.user_id = :id and a.state != 'CANCELLED'
         """.trimIndent(), MapSqlParameterSource("id", userId.id)) { rs, _ ->
             AccountTaskRole(
                 TaskId(rs.getLong("task_id")),

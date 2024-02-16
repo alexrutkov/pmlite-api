@@ -9,7 +9,7 @@
             </not>
         </preConditions>
         <sql>
-            create type agreement_state as enum ('PENDING', 'APPROVED', 'DECLINED');
+            create type agreement_state as enum ('PENDING', 'APPROVED', 'DECLINED', 'CANCELLED');
             create type agreement_type as enum ('TASK', 'TAG', 'TASK_USER', 'TASK_TEAM', 'TEAM_USER');
         </sql>
         <createTable tableName="agreements">

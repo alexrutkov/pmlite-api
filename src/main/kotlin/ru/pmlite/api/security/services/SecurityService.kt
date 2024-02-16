@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.values.UserId
 
 @Service
@@ -19,4 +20,6 @@ class SecurityService(
 
     val isAuthorized get() = SecurityContextHolder.getContext().authentication.isAuthenticated
     val userId get() = SecurityContextHolder.getContext().authentication.principal as UserId
+    val roles get() = SecurityContextHolder.getContext().authentication
+        .authorities.map { UserRole.valueOf(it.authority) }
 }

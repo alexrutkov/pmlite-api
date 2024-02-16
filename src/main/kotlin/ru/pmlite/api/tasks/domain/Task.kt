@@ -1,7 +1,7 @@
 package ru.pmlite.api.tasks.domain
 
 import ru.pmlite.api.tags.domains.Tag
-import ru.pmlite.api.users.domain.UserSummary
+import ru.pmlite.api.users.domain.UserShortDetails
 import java.time.Instant
 
 enum class UserTeamRole {
@@ -19,7 +19,7 @@ data class Team(
 }
 
 data class TeamUser(
-    val user: UserSummary,
+    val user: UserShortDetails,
     val role: UserTeamRole
 )
 

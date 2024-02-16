@@ -1,7 +1,7 @@
 package ru.pmlite.api.aggreements.domains
 
 enum class AgreementState {
-    APPROVED, DECLINED, PENDING;
+    APPROVED, DECLINED, PENDING, CANCELLED;
 
     companion object {
         fun from(decision: Decision) = when(decision){

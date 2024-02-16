@@ -39,9 +39,7 @@ class TaskRepository(
                         THEN (
                             select text2ltree(
                                 concat_ws(
-                                    '.',
-                                    coalesce(t.path::text, t.id::text)::text,
-                                    cast(:parentId as text)
+                                    '.', t.path::text, t.id::text
                                 )::text
                             ) from tasks t where t.id = :parentId
                         )
@@ -198,6 +196,33 @@ class TaskRepository(
                 .addValue("userId", userId.id)
                 .addValue("role", role.name)
             )
+    }
+
+    fun cancelTask(taskId: TaskId, userId: UserId) {
+        jdbcTemplate.update("""
+            update agreements a set state = 'CANCELLED'
+            from task_users tu
+            where 
+                tu.user_id = :userId 
+                and tu.task_id = :taskId
+                and tu.role != 'OWNER'
+                and a.id = tu.agreement_id
+        """.trimIndent(),
+            MapSqlParameterSource("taskId", taskId.id)
+                .addValue("userId", userId.id)
+            )
+    }
+
+    fun findAgreementByUserTask(taskId: TaskId, userId: UserId): AgreementId? {
+        return runCatching {
+            jdbcTemplate.queryForObject("""
+            select agreement_id from task_users where task_id = :taskId and user_id = :userId
+        """.trimIndent(),
+                MapSqlParameterSource("taskId", taskId.id)
+                    .addValue("userId", userId.id),
+                Long::class.java
+            )
+        }.getOrNull()?.let(::AgreementId)
     }
 
     private val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
