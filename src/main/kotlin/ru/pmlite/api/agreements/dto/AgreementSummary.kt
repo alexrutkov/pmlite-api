@@ -1,7 +1,7 @@
-package ru.pmlite.api.aggreements.dto
+package ru.pmlite.api.agreements.dto
 
 import com.fasterxml.jackson.annotation.JsonRawValue
-import ru.pmlite.api.aggreements.domains.AgreementType
+import ru.pmlite.api.agreements.domains.AgreementType
 import ru.pmlite.api.users.domain.UserSummary
 import ru.pmlite.api.values.AgreementId
 import java.time.Instant

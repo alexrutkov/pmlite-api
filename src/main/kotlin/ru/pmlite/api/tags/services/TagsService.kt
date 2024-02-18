@@ -2,8 +2,8 @@ package ru.pmlite.api.tags.services
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import ru.pmlite.api.aggreements.domains.AgreementType
-import ru.pmlite.api.aggreements.services.AgreementService
+import ru.pmlite.api.agreements.domains.AgreementType
+import ru.pmlite.api.agreements.services.AgreementService
 import ru.pmlite.api.tags.domains.Tag
 import ru.pmlite.api.tags.dto.CreateTagCommand
 import ru.pmlite.api.tags.dto.SearchTagCommand

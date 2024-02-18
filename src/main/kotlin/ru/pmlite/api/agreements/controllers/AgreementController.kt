@@ -1,0 +1,40 @@
+package ru.pmlite.api.agreements.controllers
+
+import org.springframework.data.domain.Pageable
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
+import ru.pmlite.api.agreements.dto.DecisionCommand
+import ru.pmlite.api.agreements.dto.UserDecisionCommand
+import ru.pmlite.api.agreements.services.AgreementService
+import ru.pmlite.api.agreements.services.DecisionService
+import ru.pmlite.api.values.AgreementId
+
+@RestController
+@RequestMapping("/api/agreements")
+class AgreementController(
+    private val agreementService: AgreementService,
+    private val decisionService: DecisionService
+) {
+
+    @GetMapping("details")
+    fun getPendingAgreementDetails() = agreementService.getPendingAgreementDetails()
+
+    @GetMapping("tasks")
+    fun getTasksAgreements(pageable: Pageable) = agreementService.getTasksAgreements(pageable)
+
+    @GetMapping("taskUsers")
+    fun getTaskUsersAgreements(pageable: Pageable) = agreementService.getTaskUsersAgreements(pageable)
+
+    @PreAuthorize("hasRole('AGREEMENT_TAG')")
+    @GetMapping("tags")
+    fun getTagsAgreements(pageable: Pageable) = agreementService.getTagsAgreements(pageable)
+
+    @GetMapping("{id}")
+    fun getAgreementDetails(@PathVariable id: Long) = agreementService.getAgreementDetails(AgreementId(id))
+
+    @PostMapping("{id}/decision")
+    fun decision(
+        @PathVariable id: Long,
+        @RequestBody command: UserDecisionCommand
+    ) = decisionService.decide(DecisionCommand(AgreementId(id), command.decision, comment = command.comment))
+}

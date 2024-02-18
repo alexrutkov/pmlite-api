@@ -1,9 +1,9 @@
-package ru.pmlite.api.aggreements.repositories
+package ru.pmlite.api.agreements.repositories
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
-import ru.pmlite.api.aggreements.dto.DecisionCommand
+import ru.pmlite.api.agreements.dto.DecisionCommand
 import ru.pmlite.api.values.UserId
 
 @Repository

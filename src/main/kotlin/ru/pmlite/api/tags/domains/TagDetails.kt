@@ -1,6 +1,6 @@
 package ru.pmlite.api.tags.domains
 
-import ru.pmlite.api.aggreements.domains.AgreementState
+import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.values.TagId
 
 data class TagDetails(

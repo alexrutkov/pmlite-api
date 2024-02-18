@@ -1,7 +1,5 @@
-package ru.pmlite.api.aggreements.domains
+package ru.pmlite.api.agreements.domains
 
 enum class Decision {
     APPROVE, DECLINE;
-
-
 }

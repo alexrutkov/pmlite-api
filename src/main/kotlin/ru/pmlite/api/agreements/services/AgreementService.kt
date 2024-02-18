@@ -1,13 +1,13 @@
-package ru.pmlite.api.aggreements.services
+package ru.pmlite.api.agreements.services
 
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import ru.pmlite.api.aggreements.domains.AgreementState
-import ru.pmlite.api.aggreements.domains.AgreementType
-import ru.pmlite.api.aggreements.dto.AgreementSummary
-import ru.pmlite.api.aggreements.dto.PendingAgreementCount
-import ru.pmlite.api.aggreements.dto.PendingAgreementDetails
-import ru.pmlite.api.aggreements.repositories.AgreementRepository
+import ru.pmlite.api.agreements.domains.AgreementState
+import ru.pmlite.api.agreements.domains.AgreementType
+import ru.pmlite.api.agreements.dto.AgreementSummary
+import ru.pmlite.api.agreements.dto.PendingAgreementCount
+import ru.pmlite.api.agreements.dto.PendingAgreementDetails
+import ru.pmlite.api.agreements.repositories.AgreementRepository
 import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.values.AgreementId
@@ -31,7 +31,7 @@ class AgreementService(
 
     fun getPendingAgreementDetails(): PendingAgreementDetails {
         val pending = mutableListOf<PendingAgreementCount>()
-        if (securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)) {
+        if (isTagAllowed()) {
             pending.add(
                 PendingAgreementCount(
                     AgreementType.TAG,
@@ -54,6 +54,8 @@ class AgreementService(
         return PendingAgreementDetails(pending)
     }
 
+    private fun isTagAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)
+
     fun getTasksAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findPendingTask(securityService.userId, pageable)
             .let(agreementRepository::getAgreementDetailsByIds)
@@ -67,5 +69,19 @@ class AgreementService(
     fun getTagsAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findPendingTags(pageable)
             .let(agreementRepository::getAgreementDetailsByIds)
+    }
+
+    fun getAgreementDetails(agreementId: AgreementId): AgreementSummary? {
+        return agreementRepository.getAgreementDetailsByIds(listOf(agreementId)).firstOrNull()
+    }
+
+    fun getAgreementsByType(type: AgreementType): List<AgreementId> {
+        return when (type) {
+            AgreementType.TASK -> agreementRepository.findPendingTask(securityService.userId)
+            AgreementType.TAG -> if (isTagAllowed()) agreementRepository.findPendingTags() else emptyList()
+            AgreementType.TASK_USER -> agreementRepository.findPendingUserTask(securityService.userId)
+            AgreementType.TASK_TEAM -> TODO()
+            AgreementType.TEAM_USER -> TODO()
+        }
     }
 }

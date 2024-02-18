@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
-import ru.pmlite.api.aggreements.domains.AgreementState
+import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.tags.domains.Tag
 import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.tasks.domain.TaskDetails

@@ -1,6 +1,6 @@
-package ru.pmlite.api.aggreements.dto
+package ru.pmlite.api.agreements.dto
 
-import ru.pmlite.api.aggreements.domains.AgreementType
+import ru.pmlite.api.agreements.domains.AgreementType
 
 data class PendingAgreementDetails(
     val agreementDetails: List<PendingAgreementCount>

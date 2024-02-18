@@ -1,7 +1,7 @@
-package ru.pmlite.api.aggreements.dto
+package ru.pmlite.api.agreements.dto
 
-import ru.pmlite.api.aggreements.domains.Decision
-import ru.pmlite.api.aggreements.domains.DecisionMode
+import ru.pmlite.api.agreements.domains.Decision
+import ru.pmlite.api.agreements.domains.DecisionMode
 import ru.pmlite.api.values.AgreementId
 
 data class DecisionCommand(

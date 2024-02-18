@@ -1,4 +1,4 @@
-package ru.pmlite.api.aggreements.domains
+package ru.pmlite.api.agreements.domains
 
 enum class AgreementState {
     APPROVED, DECLINED, PENDING, CANCELLED;

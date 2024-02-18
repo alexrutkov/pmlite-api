@@ -1,13 +1,13 @@
-package ru.pmlite.api.aggreements.repositories
+package ru.pmlite.api.agreements.repositories
 
 import org.springframework.data.domain.Pageable
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
-import ru.pmlite.api.aggreements.domains.AgreementState
-import ru.pmlite.api.aggreements.domains.AgreementType
-import ru.pmlite.api.aggreements.dto.AgreementSummary
+import ru.pmlite.api.agreements.domains.AgreementState
+import ru.pmlite.api.agreements.domains.AgreementType
+import ru.pmlite.api.agreements.dto.AgreementSummary
 import ru.pmlite.api.users.domain.UserSummary
 import ru.pmlite.api.values.AgreementId
 import ru.pmlite.api.values.UserId
@@ -38,17 +38,18 @@ class AgreementRepository(
             )
     }
 
-    fun findPendingTags(pageable: Pageable? = null): List<Long> {
+    fun findPendingTags(pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
             select id from agreements where state = 'PENDING' and type = 'TAG'
             offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("offset", pageable?.offset)
-            .addValue("limit", pageable?.pageSize)) {rs, _ -> rs.getLong("id")}
+            .addValue("limit", pageable?.pageSize))
+        {rs, _ -> AgreementId(rs.getLong("id")) }
 
     }
 
-    fun findPendingTask(userId: UserId, pageable: Pageable? = null): List<Long> {
+    fun findPendingTask(userId: UserId, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
             with cte as (
                 select concat_ws('.', '*', task_id, '*') as path from task_users where user_id = :userId and role = 'OWNER'
@@ -63,12 +64,10 @@ class AgreementRepository(
             MapSqlParameterSource("userId", userId.id)
                 .addValue("offset", pageable?.offset)
                 .addValue("limit", pageable?.pageSize)
-        ) {rs, _ ->
-            rs.getLong("id")
-        }
+        ) {rs, _ -> AgreementId(rs.getLong("id")) }
     }
 
-    fun findPendingUserTask(userId: UserId, pageable: Pageable? = null): List<Long> {
+    fun findPendingUserTask(userId: UserId, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
             select a.id from agreements a
               join task_users tu on a.id = tu.agreement_id
@@ -79,13 +78,12 @@ class AgreementRepository(
             offset :offset limit :limit
         """.trimIndent(), MapSqlParameterSource("userId", userId.id)
             .addValue("offset", pageable?.offset)
-            .addValue("limit", pageable?.pageSize)) {rs, _ ->
-            rs.getLong("id")
-        }
+            .addValue("limit", pageable?.pageSize))
+        {rs, _ -> AgreementId(rs.getLong("id")) }
     }
 
-    fun getAgreementDetailsByIds(ids: List<Long>): List<AgreementSummary> {
-        return jdbcTemplate.query("""
+    fun getAgreementDetailsByIds(ids: List<AgreementId>): List<AgreementSummary> {
+        return if (ids.isNotEmpty()) jdbcTemplate.query("""
             select 
                 a.id, a.created_at, a.type, u.id as userId, u.name,
                 (
@@ -123,7 +121,7 @@ class AgreementRepository(
                 ) as details
             from agreements a join users u on a.user_id = u.id
             where a.id in (:ids)
-        """.trimIndent(), MapSqlParameterSource("ids", ids)) {rs, _ ->
+        """.trimIndent(), MapSqlParameterSource("ids", ids.map(AgreementId::id))) { rs, _ ->
             AgreementSummary(
                 AgreementId(rs.getLong("id")),
                 UserSummary(rs.getLong("userId"), rs.getString("name")),
@@ -131,6 +129,6 @@ class AgreementRepository(
                 rs.getTimestamp("created_at").toInstant(),
                 rs.getString("details")
             )
-        }
+        } else emptyList()
     }
 }
