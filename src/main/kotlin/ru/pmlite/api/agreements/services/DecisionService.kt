@@ -1,11 +1,15 @@
 package ru.pmlite.api.agreements.services
 
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import ru.pmlite.api.account.domains.AccountEventType
 import ru.pmlite.api.account.events.AccountEvent
 import ru.pmlite.api.agreements.domains.AgreementState
+import ru.pmlite.api.agreements.domains.AgreementType
+import ru.pmlite.api.agreements.domains.DecisionDetails
 import ru.pmlite.api.agreements.dto.DecisionCommand
+import ru.pmlite.api.agreements.dto.DecisionSummary
 import ru.pmlite.api.agreements.exceptions.DecisionNotAllowedException
 import ru.pmlite.api.agreements.repositories.DecisionRepository
 import ru.pmlite.api.security.services.SecurityService
@@ -27,9 +31,18 @@ class DecisionService(
     }
 
     private fun isDecisionAllowed(agreementId: AgreementId): Boolean {
-        return agreementService.getAgreementDetails(agreementId)
+        return agreementService.getAgreementDetails(listOf(agreementId)).firstOrNull()
             ?.let { agreementService.getAgreementsByType(it.type)
                 .contains(agreementId)
             } ?: false
+    }
+
+    fun getDecisions(type: AgreementType?, pageable: Pageable): List<DecisionSummary> {
+        val decisions =  decisionRepository.getDecisions(pageable)
+        val agreements = agreementService.getAgreementDetails(decisions.map(DecisionDetails::agreementId))
+        return decisions.mapNotNull { d ->
+            agreements.find { d.agreementId == it.id }
+                ?.let { DecisionSummary(d, it) }
+        }
     }
 }

@@ -30,7 +30,8 @@ class AgreementController(
     fun getTagsAgreements(pageable: Pageable) = agreementService.getTagsAgreements(pageable)
 
     @GetMapping("{id}")
-    fun getAgreementDetails(@PathVariable id: Long) = agreementService.getAgreementDetails(AgreementId(id))
+    fun getAgreementDetails(@PathVariable id: Long) = agreementService.getAgreementDetails(listOf(AgreementId(id)))
+        .firstOrNull()
 
     @PostMapping("{id}/decision")
     fun decision(

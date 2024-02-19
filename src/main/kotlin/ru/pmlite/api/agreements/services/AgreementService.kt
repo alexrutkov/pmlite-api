@@ -71,8 +71,8 @@ class AgreementService(
             .let(agreementRepository::getAgreementDetailsByIds)
     }
 
-    fun getAgreementDetails(agreementId: AgreementId): AgreementSummary? {
-        return agreementRepository.getAgreementDetailsByIds(listOf(agreementId)).firstOrNull()
+    fun getAgreementDetails(ids: List<AgreementId>): List<AgreementSummary> {
+        return agreementRepository.getAgreementDetailsByIds(ids)
     }
 
     fun getAgreementsByType(type: AgreementType): List<AgreementId> {
