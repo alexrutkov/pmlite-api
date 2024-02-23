@@ -38,18 +38,21 @@ class AgreementRepository(
             )
     }
 
-    fun findPendingTags(pageable: Pageable? = null): List<AgreementId> {
+    fun findTags(agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
-            select id from agreements where state = 'PENDING' and type = 'TAG'
+            select id from agreements a where 
+             CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
+             and a.type = 'TAG'
             offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("offset", pageable?.offset)
-            .addValue("limit", pageable?.pageSize))
+                .addValue("id", agreementId?.id)
+                .addValue("limit", pageable?.pageSize))
         {rs, _ -> AgreementId(rs.getLong("id")) }
 
     }
 
-    fun findPendingTask(userId: UserId, pageable: Pageable? = null): List<AgreementId> {
+    fun findTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
             with cte as (
                 select concat_ws('.', '*', task_id, '*') as path from task_users where user_id = :userId and role = 'OWNER'
@@ -57,26 +60,31 @@ class AgreementRepository(
             select a.id from agreements a
              join tasks t on a.id = t.agreement_id
              where 
-                a.state = 'PENDING' and a.type = 'TASK'
+                CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
+                and a.type = 'TASK'
                 and t.path ?? (select array_agg(cte.path) from cte)::lquery[]
              offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("userId", userId.id)
+                .addValue("id", agreementId?.id)
                 .addValue("offset", pageable?.offset)
                 .addValue("limit", pageable?.pageSize)
         ) {rs, _ -> AgreementId(rs.getLong("id")) }
     }
 
-    fun findPendingUserTask(userId: UserId, pageable: Pageable? = null): List<AgreementId> {
+    fun findUserTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
             select a.id from agreements a
               join task_users tu on a.id = tu.agreement_id
               join task_users tu2 on tu.task_id = tu2.task_id
             where
-                a.state = 'PENDING' and a.type = 'TASK_USER'
+                CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
+                and a.type = 'TASK_USER'
                 and tu2.user_id = :userId and tu2.role = 'OWNER'
+                and tu2.user_id != tu.user_id
             offset :offset limit :limit
         """.trimIndent(), MapSqlParameterSource("userId", userId.id)
+            .addValue("id", agreementId?.id)
             .addValue("offset", pageable?.offset)
             .addValue("limit", pageable?.pageSize))
         {rs, _ -> AgreementId(rs.getLong("id")) }
@@ -85,7 +93,7 @@ class AgreementRepository(
     fun getAgreementDetailsByIds(ids: List<AgreementId>): List<AgreementSummary> {
         return if (ids.isNotEmpty()) jdbcTemplate.query("""
             select 
-                a.id, a.created_at, a.type, u.id as userId, u.name,
+                a.id, a.created_at, a.type, u.id as userId, u.name, a.state,
                 (
                     CASE
                         WHEN a.type = 'TASK' 
@@ -127,6 +135,7 @@ class AgreementRepository(
                 UserSummary(rs.getLong("userId"), rs.getString("name")),
                 AgreementType.valueOf(rs.getString("type")),
                 rs.getTimestamp("created_at").toInstant(),
+                AgreementState.valueOf(rs.getString("state")),
                 rs.getString("details")
             )
         } else emptyList()

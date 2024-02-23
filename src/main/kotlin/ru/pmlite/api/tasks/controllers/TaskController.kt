@@ -33,8 +33,7 @@ class TaskController(
         @Valid @RequestBody command: UpdateTaskCommand
         ) = service.updateTask(id, command)
 
-    @DeleteMapping("{id}")
-    fun cancelTask(@PathVariable id: TaskId) = service.cancelTask(id)
+
 
     @PostMapping("{id}/join")
     fun joinToTask(@PathVariable id: TaskId) = service.joinToTask(id)

@@ -10,14 +10,12 @@ import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.tags.domains.Tag
 import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.tasks.domain.TaskDetails
-import ru.pmlite.api.tasks.domain.TaskUser
 import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
 import ru.pmlite.api.tasks.dto.UpdateTaskCommand
 import ru.pmlite.api.tasks.exceptions.TaskNotFoundExceptions
-import ru.pmlite.api.users.domain.UserSummary
 import ru.pmlite.api.values.AgreementId
 import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TaskId
@@ -104,10 +102,9 @@ class TaskRepository(
 
     fun getTask(id: TaskId): TaskDetails {
         val taskSummary = getTaskSummary(id)
-        val userRelations = getUserRelation(id)
         val tags = getTags(id)
         return TaskDetails(
-            taskSummary, userRelations, tags
+            taskSummary, tags
         )
     }
 
@@ -126,20 +123,7 @@ class TaskRepository(
         }
     }
 
-    private fun getUserRelation(taskId: TaskId): List<TaskUser> {
-        return jdbcTemplate.query("""
-            select u.id as userId, u.name, tu.created_at, tu.role from task_users tu 
-            join agreements a on tu.agreement_id = a.id
-            join users u on tu.user_id = u.id
-            where task_id = :id and a.state = 'APPROVED'
-        """.trimIndent(), mapOf("id" to taskId.id)) { rs, _ ->
-            TaskUser(
-                UserSummary(rs.getLong("userId"), rs.getString("name")),
-                UserTaskRole.valueOf(rs.getString("role")),
-                rs.getTimestamp("created_at").toInstant()
-            )
-        }
-    }
+
 
     private fun getTaskSummary(taskId: TaskId): TaskSummary {
         return runCatching {
@@ -224,6 +208,8 @@ class TaskRepository(
             )
         }.getOrNull()?.let(::AgreementId)
     }
+
+
 
     private val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
         TaskSummary(

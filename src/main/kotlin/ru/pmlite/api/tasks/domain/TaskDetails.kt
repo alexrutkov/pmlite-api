@@ -10,13 +10,11 @@ data class TaskDetails(
     val name: String,
     val shortDescription: String,
     val createdAt: Instant,
-    val users: List<TaskUser>,
     val tags: List<TagDetails>
 ) {
-    constructor(task: TaskSummary, users: List<TaskUser>, tags: List<TagDetails>) :
+    constructor(task: TaskSummary, tags: List<TagDetails>) :
             this(
                 task.id, task.name, task.shortDescription, task.createdAt,
-                users,
                 tags
             )
 }

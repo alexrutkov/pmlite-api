@@ -8,6 +8,7 @@ import ru.pmlite.api.account.events.AccountEvent
 import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.agreements.domains.AgreementType
 import ru.pmlite.api.agreements.domains.DecisionDetails
+import ru.pmlite.api.agreements.dto.AgreementSummary
 import ru.pmlite.api.agreements.dto.DecisionCommand
 import ru.pmlite.api.agreements.dto.DecisionSummary
 import ru.pmlite.api.agreements.exceptions.DecisionNotAllowedException
@@ -20,6 +21,7 @@ class DecisionService(
     private val decisionRepository: DecisionRepository,
     private val securityService: SecurityService,
     private val agreementService: AgreementService,
+    private val agreementDetailsService: AgreementDetailsService,
     private val publisher: ApplicationEventPublisher
 ) {
     fun decide(command: DecisionCommand) {
@@ -31,18 +33,24 @@ class DecisionService(
     }
 
     private fun isDecisionAllowed(agreementId: AgreementId): Boolean {
-        return agreementService.getAgreementDetails(listOf(agreementId)).firstOrNull()
-            ?.let { agreementService.getAgreementsByType(it.type)
-                .contains(agreementId)
-            } ?: false
+        val agreement = agreementDetailsService.getAgreementDetails(listOf(agreementId)).first()
+        return isAgreementOwner(agreement)
+                || agreementDetailsService.getAgreementsByType(agreement).contains(agreementId)
     }
+
+    private fun isAgreementOwner(agreement: AgreementSummary) =
+        agreement.user.id == securityService.userId.id
 
     fun getDecisions(type: AgreementType?, pageable: Pageable): List<DecisionSummary> {
         val decisions =  decisionRepository.getDecisions(pageable)
-        val agreements = agreementService.getAgreementDetails(decisions.map(DecisionDetails::agreementId))
+        val agreements = agreementDetailsService.getAgreementDetails(decisions.map(DecisionDetails::agreementId))
         return decisions.mapNotNull { d ->
             agreements.find { d.agreementId == it.id }
                 ?.let { DecisionSummary(d, it) }
         }
+    }
+
+    fun canDoDecision(agreementId: AgreementId) {
+        isDecisionAllowed(agreementId).takeIf { it } ?: throw DecisionNotAllowedException()
     }
 }

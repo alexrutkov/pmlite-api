@@ -101,10 +101,8 @@ class TaskService(
         repository.deleteTaskTag(taskId, tagId)
     }
 
-    fun cancelTask(id: TaskId) {
-        repository.cancelTask(id, securityService.userId)
-        publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.TASK_CANCELLED))
-    }
+
+
 
 
 
