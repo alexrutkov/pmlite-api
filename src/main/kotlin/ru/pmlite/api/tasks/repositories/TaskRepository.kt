@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 import ru.pmlite.api.agreements.domains.AgreementState
-import ru.pmlite.api.tags.domains.Tag
 import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.tasks.domain.TaskDetails
 import ru.pmlite.api.tasks.domain.UserTaskRole
@@ -151,27 +150,6 @@ class TaskRepository(
         )
     }
 
-    fun addTaskTags(taskId: TaskId, tags: List<Tag>) {
-        jdbcTemplate.batchUpdate("""
-            insert into task_tags (task_id, tag_id) 
-            values (:id, :tagId)
-            on conflict do nothing 
-        """.trimIndent(),
-            tags.map {
-                MapSqlParameterSource("id", taskId.id)
-                    .addValue("tagId", it.tagId.id)
-            }.toTypedArray()
-        )
-    }
-
-    fun deleteTaskTag(taskId: TaskId, tagId: TagId) {
-        jdbcTemplate.update("""
-            delete from task_tags where task_id = :id and tag_id = :tagId
-        """.trimIndent(),
-            mapOf("id" to taskId.id, "tagId" to tagId.id)
-            )
-    }
-
     fun changeUserRole(taskId: TaskId, userId: UserId, role: UserTaskRole) {
         jdbcTemplate.update("""
             update task_users set role = :role::task_user_role where task_id = :taskId and user_id = :userId
@@ -179,21 +157,6 @@ class TaskRepository(
             MapSqlParameterSource("taskId", taskId.id)
                 .addValue("userId", userId.id)
                 .addValue("role", role.name)
-            )
-    }
-
-    fun cancelTask(taskId: TaskId, userId: UserId) {
-        jdbcTemplate.update("""
-            update agreements a set state = 'CANCELLED'
-            from task_users tu
-            where 
-                tu.user_id = :userId 
-                and tu.task_id = :taskId
-                and tu.role != 'OWNER'
-                and a.id = tu.agreement_id
-        """.trimIndent(),
-            MapSqlParameterSource("taskId", taskId.id)
-                .addValue("userId", userId.id)
             )
     }
 

@@ -14,6 +14,7 @@ import ru.pmlite.api.agreements.dto.DecisionCommand
 import ru.pmlite.api.agreements.services.AgreementService
 import ru.pmlite.api.agreements.services.DecisionService
 import ru.pmlite.api.security.services.SecurityService
+import ru.pmlite.api.tags.repositories.TagsRepository
 import ru.pmlite.api.tasks.domain.TaskDetails
 import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
@@ -29,6 +30,7 @@ private val logger = KotlinLogging.logger {}
 @Service
 class TaskService(
     private val securityService: SecurityService,
+    private val tagsRepository: TagsRepository,
     private val agreementService: AgreementService,
     private val decisionService: DecisionService,
     private val repository: TaskRepository,
@@ -53,7 +55,7 @@ class TaskService(
     ) {
         repository.createTask(command, agreementId)
             .also(::addOwnerUser)
-            .also { repository.addTaskTags(it, command.tags) }
+            .also { tagsRepository.addTaskTags(it, command.tags) }
     }
 
     @Transactional
@@ -94,11 +96,11 @@ class TaskService(
     @Transactional
     fun updateTask(taskId: TaskId, command: UpdateTaskCommand) {
         this.repository.updateTask(taskId, command)
-        repository.addTaskTags(taskId, command.tags)
+        tagsRepository.addTaskTags(taskId, command.tags)
     }
 
     fun deleteTaskTag(taskId: TaskId, tagId: TagId) {
-        repository.deleteTaskTag(taskId, tagId)
+        tagsRepository.deleteTaskTag(taskId, tagId)
     }
 
 
