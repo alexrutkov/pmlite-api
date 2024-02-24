@@ -1,13 +1,14 @@
 package ru.pmlite.api
 
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import java.nio.file.FileSystems
 
-@SpringBootTest
+
 class PmliteApiApplicationTests {
 
 	@Test
 	fun contextLoads() {
+		println(FileSystems.getDefault().getPath("").toAbsolutePath())
 	}
 
 }
