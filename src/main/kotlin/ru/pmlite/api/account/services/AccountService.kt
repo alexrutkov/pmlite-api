@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.pmlite.api.account.dto.AccountDetails
 import ru.pmlite.api.account.dto.ProfileDetails
+import ru.pmlite.api.account.dto.SavePasswordCommand
 import ru.pmlite.api.account.dto.SaveProfileCommand
 import ru.pmlite.api.account.repositories.AccountRepository
 import ru.pmlite.api.security.services.SecurityService
@@ -41,6 +42,15 @@ class AccountService(
 
     fun deleteTag(tagId: TagId) {
         tagsRepository.deleteUserTag(securityService.userId, tagId)
+    }
+
+    fun validatePassword(password: String) {
+        securityService.validatePassword(password)
+    }
+
+    fun savePassword(command: SavePasswordCommand) {
+        validatePassword(command.oldPassword)
+        securityService.savePassword(command.password)
     }
 
 

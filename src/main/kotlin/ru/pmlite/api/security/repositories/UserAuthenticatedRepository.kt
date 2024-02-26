@@ -99,6 +99,12 @@ class UserAuthenticatedRepository(
         }
     }
 
+    fun selectPassword(userId: UserId): String {
+        return jdbcTemplate.queryForObject("""
+            select password from users where id = :id
+        """.trimIndent(), MapSqlParameterSource("id", userId.id), String::class.java)!!
+    }
+
     private val mapUserDetails = RowMapper<UserAuthenticatedDetails> { rs, _ ->
         UserAuthenticatedDetails(
             rs.getString("email"),

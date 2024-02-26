@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.pmlite.api.email.event.UserRecoveryRequestEvent
 import ru.pmlite.api.email.services.EmailService
-import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.security.domain.UserTokenState
 import ru.pmlite.api.security.dto.SaveRecoveryPasswordCommand
 import ru.pmlite.api.security.repositories.UserAuthenticatedRepository
@@ -35,7 +34,8 @@ class RecoveryPasswordService(
         return UsernamePasswordAuthenticationToken(
             userId.id,
             "",
-            listOf(SimpleGrantedAuthority(UserRole.ROLE_USER.name))
+            authenticatedRepository.gelRolesByUser(userId)
+                .map { SimpleGrantedAuthority(it.name) }
         )
     }
 

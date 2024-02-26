@@ -71,7 +71,7 @@ class JwtTokenProvider(
         } catch (e: JwtException) {
             logger.info("Invalid JWT token. ${e.localizedMessage}, ${e.message}")
         } catch (e: IllegalArgumentException) {
-            logger.info("Invalid JWT token. IllegalArgumentException")
+            logger.info("Invalid JWT token. ${e.localizedMessage}")
         }
         return false
     }
