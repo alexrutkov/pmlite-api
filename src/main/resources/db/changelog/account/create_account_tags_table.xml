@@ -1,0 +1,41 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_account_tags" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="account_tags"/>
+            </not>
+        </preConditions>
+        <sql>
+            create type activity_state as enum ('ACTIVE', 'IN_ACTIVE', 'CANCELLED');
+        </sql>
+        <createTable tableName="account_tags">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="tag_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="state" type="activity_state" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_account_tags_users"
+                                 baseTableName="account_tags" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint constraintName="fk_account_tags_tags"
+                                 baseTableName="account_tags" baseColumnNames="tag_id"
+                                 referencedTableName="tags" referencedColumnNames="id"
+        />
+        <addUniqueConstraint tableName="account_tags" columnNames="user_id, tag_id"/>
+    </changeSet>
+</databaseChangeLog>
