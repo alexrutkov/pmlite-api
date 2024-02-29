@@ -19,4 +19,10 @@ class DecisionControllers(
         @RequestParam type: AgreementType?,
         pageable: Pageable
     ) = decisionService.getDecisions(type, pageable)
+
+    @GetMapping("my")
+    fun getMyDecisions(
+        @RequestParam type: AgreementType?,
+        pageable: Pageable
+    )  = decisionService.getMyDecisions(type, pageable)
 }

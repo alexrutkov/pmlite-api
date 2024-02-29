@@ -42,7 +42,11 @@ class DecisionService(
         agreement.user.id == securityService.userId.id
 
     fun getDecisions(type: AgreementType?, pageable: Pageable): List<DecisionSummary> {
-        val decisions =  decisionRepository.getDecisions(pageable)
+        return decisionRepository.getDecisions(type, pageable)
+            .let(::loadDetails)
+    }
+
+    private fun loadDetails(decisions: List<DecisionDetails>): List<DecisionSummary> {
         val agreements = agreementDetailsService.getAgreementDetails(decisions.map(DecisionDetails::agreementId))
         return decisions.mapNotNull { d ->
             agreements.find { d.agreementId == it.id }
@@ -52,5 +56,10 @@ class DecisionService(
 
     fun canDoDecision(agreementId: AgreementId) {
         isDecisionAllowed(agreementId).takeIf { it } ?: throw DecisionNotAllowedException()
+    }
+
+    fun getMyDecisions(type: AgreementType?, pageable: Pageable): List<DecisionSummary> {
+        return decisionRepository.getMyDecisions(securityService.userId, type, pageable)
+            .let(::loadDetails)
     }
 }
