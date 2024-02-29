@@ -27,7 +27,7 @@ class AccountTagRepository(
             from account_tags at 
                 join tags t on at.tag_id = t.id
                 join agreements a on t.agreement_id = a.id
-            where at.user_id = :userId and a.state = 'APPROVED'
+            where at.user_id = :userId and a.state = 'APPROVED' and at.state != 'CANCELLED'
         """.trimIndent())
             .param("userId", userId.id)
             .query { rs, _ ->
@@ -56,4 +56,14 @@ class AccountTagRepository(
             }.toTypedArray()
             )
     }
+
+  fun updateState(accountTagId: AccountTagId, userId: UserId, state: ActivityState) {
+    jdbcClient.sql("""
+            update account_tags set state = :state::activity_state where id = :id and user_id = :userId
+        """.trimIndent())
+      .param("id", accountTagId.id)
+      .param("userId", userId.id)
+      .param("state", state.name)
+      .update()
+  }
 }
