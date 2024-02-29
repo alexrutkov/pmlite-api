@@ -66,15 +66,25 @@ class TaskRepository(
         )
     }
 
-    fun getAllTasks(pageable: Pageable): List<TaskSummary> {
+    fun getAllTasks(userId: UserId, pageable: Pageable): List<TaskSummary> {
         return jdbcTemplate.query("""
+            with usedTags as (
+                select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
+            )
             select * from tasks t
              join agreements a on t.agreement_id = a.id
-             where a.state = 'APPROVED'
+             join task_tags tt on t.id = tt.task_id
+             where  a.state = 'APPROVED'
+             and (
+                (select count(*) = 0 from usedTags) 
+                or (tt.tag_id in (select tag_id from usedTags))
+            )
             order by t.created_at desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
-                .addValue("offset", pageable.offset),
+                .addValue("offset", pageable.offset)
+              .addValue("userId", userId.id)
+          ,
             mapTaskSummary
         )
     }

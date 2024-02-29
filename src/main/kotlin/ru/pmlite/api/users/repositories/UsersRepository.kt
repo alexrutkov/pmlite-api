@@ -10,19 +10,29 @@ import ru.pmlite.api.users.domain.UserShortDetails
 import ru.pmlite.api.users.domain.UserTask
 import ru.pmlite.api.users.exceptions.UserNotFoundException
 import ru.pmlite.api.values.TaskId
+import ru.pmlite.api.values.UserId
 
 @Repository
 class UsersRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
-    fun getAllUsers(pageable: Pageable): List<UserShortDetails> {
+    fun getAllUsers(userId: UserId, pageable: Pageable): List<UserShortDetails> {
         return jdbcTemplate.query("""
+          with usedTags as (
+                select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
+            )
             select * from users u
+            join user_tags ut on u.id = ut.user_id
             where u.state != 'BLOCKED' 
+            and (
+                (select count(*) = 0 from usedTags) 
+                or (ut.tag_id in (select tag_id from usedTags))
+            )
             order by u.created_at desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
-                .addValue("offset", pageable.offset),
+                .addValue("offset", pageable.offset)
+              .addValue("userId", userId.id),
             mapTaskSummary
         )
     }

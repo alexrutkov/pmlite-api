@@ -82,7 +82,7 @@ class TaskService(
     }
 
     fun getAllTasks(pageable: Pageable): List<TaskSummary> {
-        return repository.getAllTasks(pageable)
+        return repository.getAllTasks(securityService.userId, pageable)
     }
 
     fun getMyTasks(pageable: Pageable): List<TaskSummary>  {
