@@ -2,10 +2,8 @@ package ru.pmlite.api.users.controllers
 
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.users.services.UserAvatarService
 import ru.pmlite.api.users.services.UsersService
 import ru.pmlite.api.values.UserId
@@ -35,5 +33,12 @@ class UsersController(
     @GetMapping("{id}/avatar.jpg",
         produces = [MediaType.IMAGE_JPEG_VALUE])
     fun getAvatar(@PathVariable id: Long) = userAvatarService.getAvatar(UserId(id))
-
+    @RequestMapping(
+        "{id}/avatar.jpg",
+        method = [RequestMethod.HEAD]
+    )
+    fun avatarIsExist(@PathVariable id: Long): ResponseEntity<Any> {
+        val entity = if (userAvatarService.isExists(UserId(id))) ResponseEntity.ok() else ResponseEntity.notFound()
+        return entity.build()
+    }
 }
