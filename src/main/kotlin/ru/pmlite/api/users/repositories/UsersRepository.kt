@@ -12,6 +12,15 @@ import ru.pmlite.api.users.exceptions.UserNotFoundException
 import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.UserId
 
+val mapUserDetails = RowMapper<UserShortDetails> { rs, _ ->
+  UserShortDetails(
+    rs.getLong("id"),
+    rs.getString("name"),
+    rs.getString("description"),
+    rs.getTimestamp("created_at").toInstant()
+  )
+}
+
 @Repository
 class UsersRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
@@ -33,7 +42,7 @@ class UsersRepository(
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset)
               .addValue("userId", userId.id),
-            mapTaskSummary
+            mapUserDetails
         )
     }
 
@@ -45,7 +54,7 @@ class UsersRepository(
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset),
-            mapTaskSummary
+            mapUserDetails
         )
     }
 
@@ -53,7 +62,7 @@ class UsersRepository(
         return runCatching {
             jdbcTemplate.queryForObject("""
             select * from users u where u.id = :id
-        """.trimIndent(), MapSqlParameterSource("id", id), mapTaskSummary)
+        """.trimIndent(), MapSqlParameterSource("id", id), mapUserDetails)
         }.getOrNull() ?: throw UserNotFoundException()
     }
 
@@ -84,12 +93,4 @@ class UsersRepository(
         }
     }
 
-    private val mapTaskSummary = RowMapper<UserShortDetails> { rs, _ ->
-        UserShortDetails(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getTimestamp("created_at").toInstant()
-        )
-    }
 }

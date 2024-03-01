@@ -14,7 +14,11 @@ class UsersController(
     private val service: UsersService,
     private val userAvatarService: UserAvatarService,
 ) {
+    @GetMapping("all", params = ["search"])
+    fun searchAllUsers(@RequestParam search: String, pageable: Pageable) = service.searchAllUsers(search, pageable)
 
+    @GetMapping("my", params = ["search"])
+    fun searchMyUsers(@RequestParam search: String, pageable: Pageable) = service.searchMyUsers(search, pageable)
     @GetMapping("all")
     fun getAllUsers(pageable: Pageable) = service.getAllUsers(pageable)
 
