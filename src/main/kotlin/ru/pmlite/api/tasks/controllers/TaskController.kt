@@ -18,6 +18,11 @@ class TaskController(
     @PostMapping
     fun createTask(@Valid @RequestBody command: CreateTaskCommand) = service.createTask(command)
 
+    @GetMapping("all", params = ["search"])
+    fun searchAllTasks(@RequestParam search: String, pageable: Pageable) = service.searchAllTasks(search, pageable)
+
+    @GetMapping("my", params = ["search"])
+    fun searchMyTasks(@RequestParam search: String, pageable: Pageable) = service.searchMyTasks(search, pageable)
     @GetMapping("all")
     fun getAllTasks(pageable: Pageable) = service.getAllTasks(pageable)
 

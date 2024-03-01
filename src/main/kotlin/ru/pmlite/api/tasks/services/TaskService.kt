@@ -21,6 +21,7 @@ import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
 import ru.pmlite.api.tasks.dto.UpdateTaskCommand
+import ru.pmlite.api.tasks.repositories.SearchTaskRepository
 import ru.pmlite.api.tasks.repositories.TaskRepository
 import ru.pmlite.api.values.AgreementId
 import ru.pmlite.api.values.TagId
@@ -34,6 +35,7 @@ class TaskService(
     private val agreementService: AgreementService,
     private val decisionService: DecisionService,
     private val repository: TaskRepository,
+    private val searchRepository: SearchTaskRepository,
     private val publisher: ApplicationEventPublisher
 ) {
     @Transactional
@@ -103,10 +105,13 @@ class TaskService(
         tagsRepository.deleteTaskTag(taskId, tagId)
     }
 
+    fun searchAllTasks(search: String, pageable: Pageable): List<TaskSummary> {
+        return searchRepository.searchAllTasks(search, pageable)
+    }
 
-
-
-
+    fun searchMyTasks(search: String, pageable: Pageable): List<TaskSummary> {
+        return searchRepository.searchMyTasks(search, securityService.userId, pageable)
+    }
 
 
 }

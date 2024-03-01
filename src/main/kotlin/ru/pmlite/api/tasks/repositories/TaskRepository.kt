@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository
 import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.tasks.domain.TaskDetails
-import ru.pmlite.api.tasks.domain.UserTaskRole
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.TaskSummary
 import ru.pmlite.api.tasks.dto.TaskUserRoleDto
@@ -20,6 +19,14 @@ import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.UserId
 
+val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
+  TaskSummary(
+    rs.getLong("id").let(::TaskId),
+    rs.getString("name"),
+    rs.getString("short_description"),
+    rs.getTimestamp("created_at").toInstant()
+  )
+}
 @Repository
 class TaskRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
@@ -71,7 +78,7 @@ class TaskRepository(
             with usedTags as (
                 select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
             )
-            select * from tasks t
+            select distinct on (t.id) * from tasks t
              join agreements a on t.agreement_id = a.id
              join task_tags tt on t.id = tt.task_id
              where  a.state = 'APPROVED'
@@ -79,7 +86,7 @@ class TaskRepository(
                 (select count(*) = 0 from usedTags) 
                 or (tt.tag_id in (select tag_id from usedTags))
             )
-            order by t.created_at desc offset :offset limit :limit
+            order by t.id offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset)
@@ -92,7 +99,7 @@ class TaskRepository(
     fun getMyTasks(userId: UserId, pageable: Pageable): List<TaskSummary> {
         return jdbcTemplate.query("""
             with cte as (
-                select tt.task_id from team_users t
+                select distinct tt.task_id from team_users t
                     join task_teams tt on tt.team_id = t.team_id
                 where t.user_id = :userId
                 union distinct 
@@ -160,16 +167,6 @@ class TaskRepository(
         )
     }
 
-    fun changeUserRole(taskId: TaskId, userId: UserId, role: UserTaskRole) {
-        jdbcTemplate.update("""
-            update task_users set role = :role::task_user_role where task_id = :taskId and user_id = :userId
-        """.trimIndent(),
-            MapSqlParameterSource("taskId", taskId.id)
-                .addValue("userId", userId.id)
-                .addValue("role", role.name)
-            )
-    }
-
     fun findAgreementByUserTask(taskId: TaskId, userId: UserId): AgreementId? {
         return runCatching {
             jdbcTemplate.queryForObject("""
@@ -182,14 +179,9 @@ class TaskRepository(
         }.getOrNull()?.let(::AgreementId)
     }
 
+  fun searchAllTasks(search: String, userId: UserId, pageable: Pageable): List<TaskSummary> {
+    TODO("Not yet implemented")
+  }
 
 
-    private val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
-        TaskSummary(
-            rs.getLong("id").let(::TaskId),
-            rs.getString("name"),
-            rs.getString("short_description"),
-            rs.getTimestamp("created_at").toInstant()
-        )
-    }
 }
