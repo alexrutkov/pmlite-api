@@ -29,6 +29,7 @@ class LikesRepository(
       where user_id = :userId 
           and type = :type::entity_type 
           and entity_id in (:entities)
+          and state = 'ACTIVE'
     """.trimIndent())
       .param("userId", userId.id)
       .param("entities", entities.map(EntityId::id))

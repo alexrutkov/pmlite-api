@@ -20,16 +20,15 @@ class TaskDetailsService(
 ) {
 
   fun getAllTasks(pageable: Pageable): List<TaskSummary> {
-    return addDetails(repository.getAllTasks(securityService.userId, pageable))
+    return repository.getAllTasks(securityService.userId, pageable)
+      .let(::addDetails)
   }
 
-  private fun addDetails(tasks: List<TaskSummary>): List<TaskSummary> {
-    val myLikes = likesService.getMyLikes(tasks.map { it.id.entityId }, EntityType.TASK)
-    return tasks.map { it.copy(isLiked = myLikes.contains(it.id.entityId) ) }
-  }
+
 
   fun getMyTasks(pageable: Pageable): List<TaskSummary>  {
     return repository.getMyTasks(securityService.userId, pageable)
+      .let(::addDetails)
   }
 
   fun getTask(id: TaskId): TaskDetails {
@@ -38,9 +37,17 @@ class TaskDetailsService(
 
   fun searchAllTasks(search: String, pageable: Pageable): List<TaskSummary> {
     return searchRepository.searchAllTasks(search, pageable)
+      .let(::addDetails)
   }
 
   fun searchMyTasks(search: String, pageable: Pageable): List<TaskSummary> {
     return searchRepository.searchMyTasks(search, securityService.userId, pageable)
+      .let(::addDetails)
+  }
+
+  private fun addDetails(tasks: List<TaskSummary>): List<TaskSummary> {
+    val myLikes = if (tasks.isNotEmpty()) likesService.getMyLikes(tasks.map { it.id.entityId }, EntityType.TASK)
+    else emptyList()
+    return tasks.map { it.copy(isLiked = myLikes.contains(it.id.entityId) ) }
   }
 }

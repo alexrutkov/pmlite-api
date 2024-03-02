@@ -12,7 +12,10 @@ class SearchTaskRepository(
 ) {
   fun searchAllTasks(search: String, pageable: Pageable): List<TaskSummary> {
     return jdbcClient.sql("""
-            select distinct on (t.id) * from tasks t
+            select distinct on (t.id) 
+                 t.id, t.name, t.short_description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount 
+            from tasks t
              join agreements a on t.agreement_id = a.id
              where  a.state = 'APPROVED'  and lower(t.name) like :search
             order by t.id offset :offset limit :limit
@@ -33,9 +36,12 @@ class SearchTaskRepository(
                 union distinct 
                 select t.task_id from task_users t where t.user_id = :userId
             )
-            select * from tasks t join cte on cte.task_id = t.id
+            select distinct on (t.id) 
+                 t.id, t.name, t.short_description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount
+            from tasks t join cte on cte.task_id = t.id
             where lower(t.name) like :search
-            order by created_at desc offset :offset limit :limit
+            order by t.id desc offset :offset limit :limit
         """.trimIndent())
       .param("limit", pageable.pageSize)
       .param("search", "%${search.lowercase()}%")

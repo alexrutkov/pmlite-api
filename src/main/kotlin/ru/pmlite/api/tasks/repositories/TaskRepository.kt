@@ -109,7 +109,10 @@ class TaskRepository(
                 union distinct 
                 select t.task_id from task_users t where t.user_id = :userId
             )
-            select * from tasks t join cte on cte.task_id = t.id
+            select 
+                t.id, t.name, t.short_description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount 
+            from tasks t join cte on cte.task_id = t.id
             order by created_at desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
