@@ -9,6 +9,7 @@
     <includeAll path="tags/" relativeToChangelogFile="true" />
     <includeAll path="teams/" relativeToChangelogFile="true" />
     <includeAll path="account/" relativeToChangelogFile="true" />
+    <includeAll path="likes/" relativeToChangelogFile="true" />
 
 
 </databaseChangeLog>

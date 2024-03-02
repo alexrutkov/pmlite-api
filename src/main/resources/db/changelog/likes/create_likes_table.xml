@@ -1,0 +1,44 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_likes_table" author="alur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="likes"/>
+            </not>
+        </preConditions>
+        <sql>
+            create type entity_type as enum ('TASK', 'USER', 'TEAM');
+        </sql>
+        <createTable tableName="likes">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="entity_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="entity_type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="activity_state" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_likes_users"
+                                 baseTableName="likes" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+        />
+        <addUniqueConstraint tableName="likes" columnNames="user_id, type"/>
+
+    </changeSet>
+</databaseChangeLog>
