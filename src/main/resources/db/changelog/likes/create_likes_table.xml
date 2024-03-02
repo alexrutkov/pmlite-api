@@ -38,7 +38,13 @@
                                  baseTableName="likes" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"
         />
-        <addUniqueConstraint tableName="likes" columnNames="user_id, type"/>
-
+        <createIndex indexName="index_likes_users" tableName="likes" unique="true">
+            <column name="user_id"/>
+            <column name="type"/>
+        </createIndex>
+        <createIndex indexName="index_likes_entities" tableName="likes" >
+            <column name="entity_id"/>
+            <column name="type"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

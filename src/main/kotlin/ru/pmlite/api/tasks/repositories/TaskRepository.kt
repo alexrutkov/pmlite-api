@@ -24,7 +24,8 @@ val mapTaskSummary = RowMapper<TaskSummary> { rs, _ ->
     rs.getLong("id").let(::TaskId),
     rs.getString("name"),
     rs.getString("short_description"),
-    rs.getTimestamp("created_at").toInstant()
+    rs.getTimestamp("created_at").toInstant(),
+    rs.getLong("likeAmount")
   )
 }
 @Repository
@@ -78,7 +79,10 @@ class TaskRepository(
             with usedTags as (
                 select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
             )
-            select distinct on (t.id) * from tasks t
+            select distinct on (t.id) 
+                 t.id, t.name, t.short_description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount
+            from tasks t
              join agreements a on t.agreement_id = a.id
              join task_tags tt on t.id = tt.task_id
              where  a.state = 'APPROVED'

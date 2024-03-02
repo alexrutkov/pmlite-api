@@ -1,7 +1,6 @@
 package ru.pmlite.api.tasks.controllers
 
 import jakarta.validation.Valid
-import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.tasks.dto.CreateTaskCommand
 import ru.pmlite.api.tasks.dto.UpdateTaskCommand
@@ -17,20 +16,6 @@ class TaskController(
 
     @PostMapping
     fun createTask(@Valid @RequestBody command: CreateTaskCommand) = service.createTask(command)
-
-    @GetMapping("all", params = ["search"])
-    fun searchAllTasks(@RequestParam search: String, pageable: Pageable) = service.searchAllTasks(search, pageable)
-
-    @GetMapping("my", params = ["search"])
-    fun searchMyTasks(@RequestParam search: String, pageable: Pageable) = service.searchMyTasks(search, pageable)
-    @GetMapping("all")
-    fun getAllTasks(pageable: Pageable) = service.getAllTasks(pageable)
-
-    @GetMapping("my")
-    fun getMyTasks(pageable: Pageable) = service.getMyTasks(pageable)
-
-    @GetMapping("{id}")
-    fun getTask(@PathVariable id: TaskId) = service.getTask(id)
 
     @PutMapping("{id}")
     fun updateTask(
