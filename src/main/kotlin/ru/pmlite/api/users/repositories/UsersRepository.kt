@@ -17,7 +17,8 @@ val mapUserDetails = RowMapper<UserShortDetails> { rs, _ ->
     rs.getLong("id"),
     rs.getString("name"),
     rs.getString("description"),
-    rs.getTimestamp("created_at").toInstant()
+    rs.getTimestamp("created_at").toInstant(),
+    rs.getLong("likeAmount")
   )
 }
 
@@ -30,14 +31,17 @@ class UsersRepository(
           with usedTags as (
                 select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
             )
-            select * from users u
+          select distinct on (u.id) 
+                 u.id, u.name, u.description, u.created_at,
+                 (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount 
+          from users u
             join user_tags ut on u.id = ut.user_id
             where u.state != 'BLOCKED' 
             and (
                 (select count(*) = 0 from usedTags) 
                 or (ut.tag_id in (select tag_id from usedTags))
             )
-            order by u.created_at desc offset :offset limit :limit
+            order by u.id desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset)
@@ -48,9 +52,12 @@ class UsersRepository(
 
     fun getMyUsers(pageable: Pageable): List<UserShortDetails> {
         return jdbcTemplate.query("""
-            select * from users u
+            select distinct on (u.id) 
+                 u.id, u.name, u.description, u.created_at,
+                 (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount 
+            from users u
             where u.state != 'BLOCKED' 
-            order by u.created_at desc offset :offset limit :limit
+            order by u.id desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset),
@@ -61,7 +68,10 @@ class UsersRepository(
     fun getUserDetails(id: Long): UserShortDetails {
         return runCatching {
             jdbcTemplate.queryForObject("""
-            select * from users u where u.id = :id
+            select
+                 u.id, u.name, u.description, u.created_at,
+                 (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount 
+            from users u where u.id = :id
         """.trimIndent(), MapSqlParameterSource("id", id), mapUserDetails)
         }.getOrNull() ?: throw UserNotFoundException()
     }

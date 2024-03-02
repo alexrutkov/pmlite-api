@@ -151,7 +151,10 @@ class TaskRepository(
     private fun getTaskSummary(taskId: TaskId): TaskSummary {
         return runCatching {
             jdbcTemplate.queryForObject("""
-            select * from tasks where id = :id
+            select 
+                t.id, t.name, t.short_description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount 
+            from tasks t where t.id = :id
         """.trimIndent(),
                 MapSqlParameterSource("id", taskId.id),
                 mapTaskSummary
@@ -185,10 +188,6 @@ class TaskRepository(
             )
         }.getOrNull()?.let(::AgreementId)
     }
-
-  fun searchAllTasks(search: String, userId: UserId, pageable: Pageable): List<TaskSummary> {
-    TODO("Not yet implemented")
-  }
 
 
 }

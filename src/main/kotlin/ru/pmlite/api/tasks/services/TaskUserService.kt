@@ -1,7 +1,5 @@
 package ru.pmlite.api.tasks.services
 
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -14,26 +12,18 @@ import ru.pmlite.api.agreements.services.DecisionService
 import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.tasks.domain.TaskUser
 import ru.pmlite.api.tasks.domain.UserTaskRole
-import ru.pmlite.api.tasks.repositories.TaskRepository
 import ru.pmlite.api.tasks.repositories.TaskUserRepository
 import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.UserId
 
 @Service
 class TaskUserService(
-    private val taskRepository: TaskRepository,
     private val taskUserRepository: TaskUserRepository,
     private val securityService: SecurityService,
     private val decisionService: DecisionService,
     private val publisher: ApplicationEventPublisher
-) : ApplicationRunner {
+) {
 
-
-
-    override fun run(args: ApplicationArguments?) {
-        /*taskRepository.changeUserRole(TaskId(10), UserId(5), UserTaskRole.EMPLOYEE)
-        publisher.publishEvent(AccountEvent(UserId(5), AccountEventType.ROLES_UPDATED))*/
-    }
 
     fun getUsers(taskId: TaskId, pageable: Pageable): List<TaskUser> {
         return taskUserRepository.getUserRelation(taskId, pageable)
