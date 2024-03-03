@@ -2,6 +2,7 @@ package ru.pmlite.api.users.services
 
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.likes.domain.EntityType
 import ru.pmlite.api.likes.services.LikesService
 import ru.pmlite.api.likes.services.StarsService
@@ -37,6 +38,7 @@ class UsersService(
         val details = repository.getUserDetails(userId)
             .let { addDetails(listOf(it)) }.first()
         val tags = tagsRepository.getTagsByUser(userId)
+            .filter { it.state == AgreementState.APPROVED }
         return UserDetails(details, tags)
     }
 
