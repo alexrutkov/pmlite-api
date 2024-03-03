@@ -86,7 +86,7 @@ class TaskRepository(
                  (select count(*) from stars l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as starAmount
             from tasks t
              join agreements a on t.agreement_id = a.id
-             join task_tags tt on t.id = tt.task_id
+             left join task_tags tt on t.id = tt.task_id
              where  a.state = 'APPROVED'
              and (
                 (select count(*) = 0 from usedTags) 
@@ -111,14 +111,18 @@ class TaskRepository(
                 union distinct 
                 select t.task_id from task_users t where t.user_id = :userId
                 union distinct 
-                select s.entity_id from stars s where s.user_id = :userId and state = 'ACTIVE' and type = 'TASK'
+                select s.entity_id as task_id from stars s where s.user_id = :userId and state = 'ACTIVE' and type = 'TASK'
+            ), usedTags as (
+                select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
             )
-            select 
+            select distinct on (t.id) 
                 t.id, t.name, t.short_description, t.created_at,
                  (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount,
                  (select count(*) from stars l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as starAmount 
             from tasks t join cte on cte.task_id = t.id
-            order by created_at desc offset :offset limit :limit
+            left join task_tags tt on t.id = tt.task_id
+            where (select count(*) = 0 from usedTags)  or (tt.tag_id in (select tag_id from usedTags))
+            order by id desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
                 .addValue("offset", pageable.offset)

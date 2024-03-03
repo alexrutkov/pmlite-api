@@ -30,7 +30,7 @@ class UsersService(
     }
 
     fun getMyUsers(pageable: Pageable): List<UserShortDetails> {
-        return repository.getMyUsers(pageable)
+        return repository.getMyUsers(securityService.userId, pageable)
             .let(::addDetails)
     }
 

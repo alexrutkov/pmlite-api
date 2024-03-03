@@ -37,7 +37,7 @@ class UsersRepository(
                  (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount,
                  (select count(*) from stars l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as starAmount  
           from users u
-            join user_tags ut on u.id = ut.user_id
+            left join user_tags ut on u.id = ut.user_id
             where u.state != 'BLOCKED' 
             and (
                 (select count(*) = 0 from usedTags) 
@@ -52,18 +52,28 @@ class UsersRepository(
         )
     }
 
-    fun getMyUsers(pageable: Pageable): List<UserShortDetails> {
+    fun getMyUsers(userId: UserId, pageable: Pageable): List<UserShortDetails> {
         return jdbcTemplate.query("""
+              with usedTags as (
+                select tag_id from account_tags where user_id = :userId and state = 'ACTIVE'
+            )
             select distinct on (u.id) 
                  u.id, u.name, u.description, u.created_at,
                  (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount,
                  (select count(*) from stars l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as starAmount 
-            from users u join stars s on u.id = s.user_id
-            where s.state = 'ACTIVE' and s.type = 'USER' and u.id = s.entity_id 
+            from users u join stars s on s.entity_id = u.id 
+            left join user_tags ut on u.id = ut.user_id
+            where u.state != 'BLOCKED' 
+            and s.user_id = :userId and s.state = 'ACTIVE' and s.type = 'USER' 
+            and (
+                    (select count(*) = 0 from usedTags) 
+                    or (ut.tag_id in (select tag_id from usedTags))
+                )
             order by u.id desc offset :offset limit :limit
         """.trimIndent(),
             MapSqlParameterSource("limit", pageable.pageSize)
-                .addValue("offset", pageable.offset),
+                .addValue("offset", pageable.offset)
+                .addValue("userId", userId.id),
             mapUserDetails
         )
     }

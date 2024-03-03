@@ -14,7 +14,8 @@ class SearchTaskRepository(
     return jdbcClient.sql("""
             select distinct on (t.id) 
                  t.id, t.name, t.short_description, t.created_at,
-                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount 
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount,
+                 (select count(*) from stars l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as starAmount  
             from tasks t
              join agreements a on t.agreement_id = a.id
              where  a.state = 'APPROVED'  and lower(t.name) like :search
@@ -35,10 +36,13 @@ class SearchTaskRepository(
                 where t.user_id = :userId
                 union distinct 
                 select t.task_id from task_users t where t.user_id = :userId
+                union distinct 
+                select s.entity_id as task_id from stars s where s.user_id = :userId and state = 'ACTIVE' and type = 'TASK'
             )
             select distinct on (t.id) 
                  t.id, t.name, t.short_description, t.created_at,
-                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as likeAmount,
+                 (select count(*) from stars l where l.entity_id = t.id and l.type = 'TASK' and l.state = 'ACTIVE') as starAmount 
             from tasks t join cte on cte.task_id = t.id
             where lower(t.name) like :search
             order by t.id desc offset :offset limit :limit
