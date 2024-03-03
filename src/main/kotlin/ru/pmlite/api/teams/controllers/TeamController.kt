@@ -1,0 +1,24 @@
+package ru.pmlite.api.teams.controllers
+
+import jakarta.validation.Valid
+import org.springframework.web.bind.annotation.*
+import ru.pmlite.api.teams.dto.CreateTeamCommand
+import ru.pmlite.api.teams.dto.UpdateTeamCommand
+import ru.pmlite.api.teams.services.TeamService
+import ru.pmlite.api.values.TeamId
+
+@RequestMapping("/api/teams")
+@RestController
+class TeamController(
+  private val service: TeamService
+) {
+
+  @PostMapping
+  fun createTask(@Valid @RequestBody command: CreateTeamCommand) = service.createTeam(command)
+
+  @PutMapping("{id}")
+  fun updateTask(
+    @PathVariable id: Long,
+    @Valid @RequestBody command: UpdateTeamCommand
+  ) = service.updateTeam(TeamId(id), command)
+}

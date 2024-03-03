@@ -67,7 +67,6 @@ class TaskService(
         val agreementId = addUser(taskId, UserTaskRole.OWNER)
         DecisionCommand(agreementId, Decision.APPROVE, DecisionMode.AUTO)
             .also(decisionService::decide)
-
     }
 
     private fun addUser(taskId: TaskId, role: UserTaskRole): AgreementId {

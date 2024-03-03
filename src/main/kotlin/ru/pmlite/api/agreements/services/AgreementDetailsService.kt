@@ -44,6 +44,8 @@ class AgreementDetailsService(
 
     private fun isTagAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)
 
+    private fun isTeamAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)
+
     fun getTasksAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findTask(securityService.userId, pageable = pageable)
             .let(agreementRepository::getAgreementDetailsByIds)
@@ -68,6 +70,7 @@ class AgreementDetailsService(
             AgreementType.TASK -> agreementRepository.findTask(securityService.userId, agreement.id)
             AgreementType.TAG -> if (isTagAllowed()) agreementRepository.findTags(agreement.id) else emptyList()
             AgreementType.TASK_USER -> agreementRepository.findUserTask(securityService.userId, agreement.id)
+            AgreementType.TEAM -> if (isTeamAllowed()) agreementRepository.findTags(agreement.id) else emptyList()
             AgreementType.TASK_TEAM -> TODO()
             AgreementType.TEAM_USER -> TODO()
         }

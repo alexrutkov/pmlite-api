@@ -101,6 +101,11 @@ class AgreementRepository(
                 select jsonb_build_object('taskName', t.name, 'taskId', t.id) 
                 from tasks t where t.agreement_id = a.id
                                     )
+                        WHEN a.type = 'TEAM' 
+                            THEN (
+                select jsonb_build_object('teamName', t.name, 'teamId', t.id) 
+                from teams t where t.agreement_id = a.id
+                                    )
                         WHEN a.type = 'TASK_USER' 
                             THEN (
                 select jsonb_build_object('taskName', tt.name, 'taskId', tt.id)

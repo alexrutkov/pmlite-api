@@ -9,7 +9,7 @@
             </not>
         </preConditions>
         <sql>
-            create type task_team_role as enum ('EMPLOYEE', 'CHIEF');
+            create type user_team_role as enum ('EMPLOYEE', 'OWNER');
         </sql>
         <createTable tableName="team_users" >
             <column name="team_id" type="bigint">
@@ -21,7 +21,7 @@
             <column name="agreement_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="role" type="task_team_role" defaultValue="EMPLOYEE">
+            <column name="role" type="user_team_role" defaultValue="EMPLOYEE">
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamptz" defaultValueComputed="now()">

@@ -4,7 +4,7 @@ import ru.pmlite.api.users.domain.UserShortDetails
 import java.time.Instant
 
 enum class UserTeamRole {
-    EMPLOYEE, CHIEF
+    EMPLOYEE, OWNER
 }
 
 data class Team(
