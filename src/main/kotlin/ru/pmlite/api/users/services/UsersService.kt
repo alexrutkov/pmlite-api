@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import ru.pmlite.api.likes.domain.EntityType
 import ru.pmlite.api.likes.services.LikesService
+import ru.pmlite.api.likes.services.StarsService
 import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.users.domain.UserShortDetails
 import ru.pmlite.api.users.domain.UserTask
@@ -15,7 +16,8 @@ class UsersService(
     private val repository: UsersRepository,
     private val searchRepository: SearchUserRepository,
     private val securityService: SecurityService,
-    private val likesService: LikesService
+    private val likesService: LikesService,
+    private val starService: StarsService
 ) {
     fun getAllUsers(pageable: Pageable): List<UserShortDetails> {
         return repository.getAllUsers(securityService.userId, pageable)
@@ -45,8 +47,13 @@ class UsersService(
     }
 
     private fun addDetails(users: List<UserShortDetails>): List<UserShortDetails> {
-        val myLikes = if (users.isNotEmpty()) likesService.getMyLikes(users.map(UserShortDetails::entityId), EntityType.USER)
-        else emptyList()
-        return users.map { it.copy(isLiked = myLikes.contains(it.entityId) ) }
+        val myLikes = likesService.getMyLikes(users.map(UserShortDetails::entityId), EntityType.USER)
+        val myStars = starService.getMyStars(users.map(UserShortDetails::entityId), EntityType.USER)
+        return users.map {
+            it.copy(
+                isLiked = myLikes.contains(it.entityId),
+                isStared = myStars.contains(it.entityId)
+            )
+        }
     }
 }

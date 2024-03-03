@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import ru.pmlite.api.likes.domain.EntityType
 import ru.pmlite.api.likes.services.LikesService
+import ru.pmlite.api.likes.services.StarsService
 import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.tasks.domain.TaskDetails
 import ru.pmlite.api.tasks.dto.TaskSummary
@@ -16,7 +17,8 @@ class TaskDetailsService(
   private val securityService: SecurityService,
   private val repository: TaskRepository,
   private val searchRepository: SearchTaskRepository,
-  private val likesService: LikesService
+  private val likesService: LikesService,
+  private val starsService: StarsService,
 ) {
 
   fun getAllTasks(pageable: Pageable): List<TaskSummary> {
@@ -46,8 +48,13 @@ class TaskDetailsService(
   }
 
   private fun addDetails(tasks: List<TaskSummary>): List<TaskSummary> {
-    val myLikes = if (tasks.isNotEmpty()) likesService.getMyLikes(tasks.map { it.id.entityId }, EntityType.TASK)
-    else emptyList()
-    return tasks.map { it.copy(isLiked = myLikes.contains(it.id.entityId) ) }
+    val myLikes =  likesService.getMyLikes(tasks.map { it.id.entityId }, EntityType.TASK)
+    val myStars =  starsService.getMyStars(tasks.map { it.id.entityId }, EntityType.TASK)
+    return tasks.map {
+      it.copy(
+        isLiked = myLikes.contains(it.id.entityId),
+        isStared = myStars.contains(it.id.entityId)
+      )
+    }
   }
 }

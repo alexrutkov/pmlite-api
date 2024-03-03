@@ -14,10 +14,11 @@ data class UserShortDetails(
     val description: String = "",
     val createdAt: Instant = Instant.now(),
     override val likeAmount: Long,
-    override val isLiked: Boolean = false
+    override val starAmount: Long,
+    override val isLiked: Boolean = false,
+    override val isStared: Boolean = false
 ) : LikeEntity {
     val entityId get() = EntityId(id)
-
 }
 
 

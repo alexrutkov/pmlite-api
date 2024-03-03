@@ -8,12 +8,12 @@ import ru.pmlite.api.values.EntityId
 import ru.pmlite.api.values.UserId
 
 @Repository
-class LikesRepository(
+class StarsRepository(
   private val jdbcClient: JdbcClient
 ) {
-  fun addLike(userId: UserId, like: EntityDto) {
+  fun addStar(userId: UserId, like: EntityDto) {
     jdbcClient.sql("""
-      insert into likes (user_id, entity_id, type) 
+      insert into stars (user_id, entity_id, type) 
       values (:userId, :entityId, :type::entity_type)
       on conflict (user_id, entity_id, type) do update set state = 'ACTIVE', updated_at = now()
     """.trimIndent())
@@ -23,9 +23,9 @@ class LikesRepository(
       .update()
   }
 
-  fun findLikesBy(userId: UserId, entities: List<EntityId>, type: EntityType): List<EntityId> {
+  fun findStarsBy(userId: UserId, entities: List<EntityId>, type: EntityType): List<EntityId> {
     return jdbcClient.sql("""
-      select entity_id from likes 
+      select entity_id from stars 
       where user_id = :userId 
           and type = :type::entity_type 
           and entity_id in (:entities)
@@ -39,9 +39,9 @@ class LikesRepository(
       .map(::EntityId)
   }
 
-  fun disLike(userId: UserId, like: EntityDto) {
+  fun disStar(userId: UserId, like: EntityDto) {
     jdbcClient.sql("""
-      update likes set state = 'CANCELLED', updated_at = now()
+      update stars set state = 'CANCELLED', updated_at = now()
       where user_id = :userId 
           and type = :type::entity_type 
           and entity_id = :entityId

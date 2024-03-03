@@ -2,16 +2,13 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="create_likes_table" author="alur">
+    <changeSet id="create_stars_table" author="alur">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="likes"/>
+                <tableExists tableName="stars"/>
             </not>
         </preConditions>
-        <sql>
-            create type entity_type as enum ('TASK', 'USER', 'TEAM');
-        </sql>
-        <createTable tableName="likes">
+        <createTable tableName="stars">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
             </column>
@@ -34,16 +31,16 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addForeignKeyConstraint constraintName="fk_likes_users"
-                                 baseTableName="likes" baseColumnNames="user_id"
+        <addForeignKeyConstraint constraintName="fk_stars_users"
+                                 baseTableName="stars" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"
         />
-        <createIndex indexName="index_likes_users" tableName="likes" unique="true">
+        <createIndex indexName="index_stars_users" tableName="stars" unique="true">
             <column name="user_id"/>
             <column name="entity_id"/>
             <column name="type"/>
         </createIndex>
-        <createIndex indexName="index_likes_entities" tableName="likes" >
+        <createIndex indexName="index_stars_entities" tableName="stars" >
             <column name="entity_id"/>
             <column name="type"/>
         </createIndex>
