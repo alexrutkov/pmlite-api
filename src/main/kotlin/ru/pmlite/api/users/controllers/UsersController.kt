@@ -26,7 +26,7 @@ class UsersController(
     fun getMyUsers(pageable: Pageable) = service.getMyUsers(pageable)
 
     @GetMapping("{id}")
-    fun getUserDetails(@PathVariable id: Long) = service.getUserDetails(id)
+    fun getUserDetails(@PathVariable id: Long) = service.getUserDetails(UserId(id))
 
     @GetMapping("{id}/tasks")
     fun getUserTasks(

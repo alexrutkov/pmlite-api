@@ -9,7 +9,7 @@ import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.security.domain.UserState
 import ru.pmlite.api.security.dto.RegistrationCommand
 import ru.pmlite.api.security.dto.UserAuthenticatedDetails
-import ru.pmlite.api.security.dto.UserDetails
+import ru.pmlite.api.security.dto.UserSecurityDetails
 import ru.pmlite.api.values.UserId
 
 @Repository
@@ -59,7 +59,7 @@ class UserAuthenticatedRepository(
             )
     }
 
-    fun getUserDetailsById(userId: UserId): UserDetails {
+    fun getUserDetailsById(userId: UserId): UserSecurityDetails {
         return runCatching {
             jdbcTemplate.queryForObject("""
             select id, email, name, updated_at from users where id = :id
@@ -80,7 +80,7 @@ class UserAuthenticatedRepository(
         )
     }
 
-    fun findUserDetailsByEmail(email: String): UserDetails {
+    fun findUserDetailsByEmail(email: String): UserSecurityDetails {
         return runCatching {
             jdbcTemplate.queryForObject("""
             select id, email, name, updated_at from users where email = :email
@@ -113,8 +113,8 @@ class UserAuthenticatedRepository(
         )
     }
 
-    private val mapUserShortDetails = RowMapper<UserDetails> { rs, _ ->
-        UserDetails(
+    private val mapUserShortDetails = RowMapper<UserSecurityDetails> { rs, _ ->
+        UserSecurityDetails(
             rs.getLong("id").let(::UserId),
             rs.getString("name"),
             rs.getString("email"),

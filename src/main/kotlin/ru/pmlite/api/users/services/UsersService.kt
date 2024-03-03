@@ -6,10 +6,13 @@ import ru.pmlite.api.likes.domain.EntityType
 import ru.pmlite.api.likes.services.LikesService
 import ru.pmlite.api.likes.services.StarsService
 import ru.pmlite.api.security.services.SecurityService
+import ru.pmlite.api.tags.repositories.TagsRepository
+import ru.pmlite.api.users.domain.UserDetails
 import ru.pmlite.api.users.domain.UserShortDetails
 import ru.pmlite.api.users.domain.UserTask
 import ru.pmlite.api.users.repositories.SearchUserRepository
 import ru.pmlite.api.users.repositories.UsersRepository
+import ru.pmlite.api.values.UserId
 
 @Service
 class UsersService(
@@ -17,7 +20,8 @@ class UsersService(
     private val searchRepository: SearchUserRepository,
     private val securityService: SecurityService,
     private val likesService: LikesService,
-    private val starService: StarsService
+    private val starService: StarsService,
+    private val tagsRepository: TagsRepository
 ) {
     fun getAllUsers(pageable: Pageable): List<UserShortDetails> {
         return repository.getAllUsers(securityService.userId, pageable)
@@ -29,9 +33,11 @@ class UsersService(
             .let(::addDetails)
     }
 
-    fun getUserDetails(id: Long): UserShortDetails {
-        return repository.getUserDetails(id)
+    fun getUserDetails(userId: UserId): UserDetails {
+        val details = repository.getUserDetails(userId)
             .let { addDetails(listOf(it)) }.first()
+        val tags = tagsRepository.getTagsByUser(userId)
+        return UserDetails(details, tags)
     }
 
     fun getUserTasks(id: Long, pageable: Pageable): List<UserTask> {

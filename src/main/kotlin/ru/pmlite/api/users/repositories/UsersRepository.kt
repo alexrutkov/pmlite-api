@@ -68,7 +68,7 @@ class UsersRepository(
         )
     }
 
-    fun getUserDetails(id: Long): UserShortDetails {
+    fun getUserDetails(userId: UserId): UserShortDetails {
         return runCatching {
             jdbcTemplate.queryForObject("""
             select
@@ -76,7 +76,7 @@ class UsersRepository(
                  (select count(*) from likes l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as likeAmount,
                  (select count(*) from stars l where l.entity_id = u.id and l.type = 'USER' and l.state = 'ACTIVE') as starAmount 
             from users u where u.id = :id
-        """.trimIndent(), MapSqlParameterSource("id", id), mapUserDetails)
+        """.trimIndent(), MapSqlParameterSource("id", userId.id), mapUserDetails)
         }.getOrNull() ?: throw UserNotFoundException()
     }
 
