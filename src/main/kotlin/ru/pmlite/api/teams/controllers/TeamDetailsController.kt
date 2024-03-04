@@ -1,11 +1,9 @@
 package ru.pmlite.api.teams.controllers
 
 import org.springframework.data.domain.Pageable
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.teams.services.TeamDetailsService
+import ru.pmlite.api.values.TeamId
 
 @RequestMapping("/api/teams")
 @RestController
@@ -24,6 +22,6 @@ class TeamDetailsController(
   @GetMapping("my")
   fun getMyTeams(pageable: Pageable) = service.getMyTeams(pageable)
 
-/*  @GetMapping("{id}")
-  fun getTeam(@PathVariable id: TeamId) = service.getTeam(id)*/
+  @GetMapping("{id}")
+  fun getTeam(@PathVariable id: TeamId) = service.getTeam(id)
 }

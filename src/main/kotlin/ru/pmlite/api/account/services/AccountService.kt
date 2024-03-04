@@ -22,7 +22,8 @@ class AccountService(
         return repository.getAccountDetails(userId)
             .copy(
                 roles = repository.getAccountRoles(userId),
-                taskRoles = repository.getAccountTaskRoles(userId)
+                taskRoles = repository.getAccountTaskRoles(userId),
+                teamRoles = repository.getAccountTeamRoles(userId),
             )
     }
 

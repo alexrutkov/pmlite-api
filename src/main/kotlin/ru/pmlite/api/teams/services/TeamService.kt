@@ -50,7 +50,7 @@ class TeamService(
   }
   @Transactional
   fun updateTeam(teamId: TeamId, command: UpdateTeamCommand) {
-/*    this.repository.updateTask(taskId, command)
-    tagsRepository.addTaskTags(taskId, command.tags)*/
+    this.repository.updateTeam(teamId, command)
+    tagsRepository.addTeamTags(teamId, command.tags)
   }
 }

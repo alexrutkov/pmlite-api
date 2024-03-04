@@ -10,6 +10,6 @@ data class UpdateTeamCommand(
   val name: String,
   @field: NotBlank
   @field: Size(min = 2, max = 255)
-  val shortDescription: String,
+  val description: String,
   val tags: List<TagDto>
 )

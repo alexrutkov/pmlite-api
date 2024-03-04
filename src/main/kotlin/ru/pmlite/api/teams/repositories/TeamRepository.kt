@@ -5,10 +5,11 @@ import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
-import ru.pmlite.api.teams.dto.CreateTeamCommand
-import ru.pmlite.api.teams.dto.TeamSummary
-import ru.pmlite.api.teams.dto.TeamUserRoleDto
+import ru.pmlite.api.agreements.domains.AgreementState
+import ru.pmlite.api.tags.domains.TagDetails
+import ru.pmlite.api.teams.dto.*
 import ru.pmlite.api.values.AgreementId
+import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TeamId
 import ru.pmlite.api.values.UserId
 
@@ -108,5 +109,55 @@ class TeamRepository(
       .param("userId", userId.id)
       .query(mapTeamSummary)
       .list()
+  }
+
+  fun getTeam(teamId: TeamId): TeamDetails {
+    return TeamDetails(
+      getTeamSummary(teamId),
+      getTeamTags(teamId)
+    )
+  }
+
+  private fun getTeamTags(teamId: TeamId): MutableList<TagDetails> {
+    return jdbcClient.sql("""
+      select t.tag, t.id, a.state from team_tags tt 
+            join tags t on tt.tag_id = t.id
+            join agreements a on t.agreement_id = a.id
+            where team_id = :teamId
+    """.trimIndent())
+      .param("teamId", teamId.id)
+      .query { rs, _ ->
+        TagDetails(
+          TagId(rs.getLong("id")),
+          rs.getString("tag"),
+          AgreementState.valueOf(rs.getString("state"))
+        )
+      }.list()
+  }
+
+  private fun getTeamSummary(teamId: TeamId): TeamSummary {
+    return jdbcClient.sql("""
+      select distinct on (t.id) 
+                t.id, t.name, t.description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TEAM' and l.state = 'ACTIVE') as likeAmount,
+                 (select count(*) from stars l where l.entity_id = t.id and l.type = 'TEAM' and l.state = 'ACTIVE') as starAmount 
+            from teams t
+       where t.id = :teamId
+    """.trimIndent())
+      .param("teamId", teamId.id)
+      .query(mapTeamSummary)
+      .single()
+  }
+
+  fun updateTeam(teamId: TeamId, command: UpdateTeamCommand) {
+    jdbcClient.sql("""
+      update teams t 
+          set name = :name, description = :description
+      where t.id = :teamId
+    """.trimIndent())
+      .param("teamId", teamId.id)
+      .param("name", command.name)
+      .param("description", command.description)
+      .update()
   }
 }

@@ -6,9 +6,11 @@ import ru.pmlite.api.likes.domain.EntityType
 import ru.pmlite.api.likes.services.LikesService
 import ru.pmlite.api.likes.services.StarsService
 import ru.pmlite.api.security.services.SecurityService
+import ru.pmlite.api.teams.dto.TeamDetails
 import ru.pmlite.api.teams.dto.TeamSummary
 import ru.pmlite.api.teams.repositories.SearchTeamRepository
 import ru.pmlite.api.teams.repositories.TeamRepository
+import ru.pmlite.api.values.TeamId
 
 @Service
 class TeamDetailsService(
@@ -16,12 +18,12 @@ class TeamDetailsService(
   private val repository: TeamRepository,
   private val searchRepository: SearchTeamRepository,
   private val likesService: LikesService,
-  private val starsService: StarsService,
+  private val starsService: StarsService
 ) {
 
-/*  fun getTeam(id: TeamId): TeamDetails {
-    return repository.getTeam(id)
-  }*/
+  fun getTeam(teamId: TeamId): TeamDetails {
+    return repository.getTeam(teamId)
+  }
 
   fun getAllTeams(pageable: Pageable): List<TeamSummary> {
     return repository.getAllTeams(securityService.userId, pageable)
