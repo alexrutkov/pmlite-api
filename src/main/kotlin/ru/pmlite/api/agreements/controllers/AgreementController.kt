@@ -29,6 +29,10 @@ class AgreementController(
     @GetMapping("tags")
     fun getTagsAgreements(pageable: Pageable) = agreementService.getTagsAgreements(pageable)
 
+    @PreAuthorize("hasRole('AGREEMENT_TEAM')")
+    @GetMapping("teams")
+    fun getTeamsAgreements(pageable: Pageable) = agreementService.getTeamsAgreements(pageable)
+
     @GetMapping("{id}")
     fun getAgreementDetails(@PathVariable id: Long) = agreementService.getAgreementDetails(listOf(AgreementId(id)))
         .firstOrNull()

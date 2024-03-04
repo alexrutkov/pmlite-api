@@ -20,12 +20,10 @@ class AgreementDetailsService(
     fun getPendingAgreementDetails(): PendingAgreementDetails {
         val pending = mutableListOf<PendingAgreementCount>()
         if (isTagAllowed()) {
-            pending.add(
-                PendingAgreementCount(
-                    AgreementType.TAG,
-                    agreementRepository.findTags().size
-                )
-            )
+            pending.add(PendingAgreementCount(AgreementType.TAG, agreementRepository.findTags().size))
+        }
+        if (isTeamAllowed()) {
+            pending.add(PendingAgreementCount(AgreementType.TEAM, agreementRepository.findTeamAgreements().size))
         }
         pending.add(
             PendingAgreementCount(
@@ -44,7 +42,7 @@ class AgreementDetailsService(
 
     private fun isTagAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)
 
-    private fun isTeamAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TAG)
+    private fun isTeamAllowed() = securityService.roles.contains(UserRole.ROLE_AGREEMENT_TEAM)
 
     fun getTasksAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findTask(securityService.userId, pageable = pageable)
@@ -53,6 +51,11 @@ class AgreementDetailsService(
 
     fun getTaskUsersAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findUserTask(securityService.userId, pageable = pageable)
+            .let(agreementRepository::getAgreementDetailsByIds)
+    }
+
+    fun getTeamsAgreements(pageable: Pageable): List<AgreementSummary> {
+        return agreementRepository.findTeamAgreements(pageable = pageable)
             .let(agreementRepository::getAgreementDetailsByIds)
     }
 
@@ -70,7 +73,7 @@ class AgreementDetailsService(
             AgreementType.TASK -> agreementRepository.findTask(securityService.userId, agreement.id)
             AgreementType.TAG -> if (isTagAllowed()) agreementRepository.findTags(agreement.id) else emptyList()
             AgreementType.TASK_USER -> agreementRepository.findUserTask(securityService.userId, agreement.id)
-            AgreementType.TEAM -> if (isTeamAllowed()) agreementRepository.findTags(agreement.id) else emptyList()
+            AgreementType.TEAM -> if (isTeamAllowed()) agreementRepository.findTeamAgreements(agreement.id) else emptyList()
             AgreementType.TASK_TEAM -> TODO()
             AgreementType.TEAM_USER -> TODO()
         }

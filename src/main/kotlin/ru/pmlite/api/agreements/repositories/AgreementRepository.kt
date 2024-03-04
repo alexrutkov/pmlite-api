@@ -1,8 +1,10 @@
 package ru.pmlite.api.agreements.repositories
 
 import org.springframework.data.domain.Pageable
+import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 import ru.pmlite.api.agreements.domains.AgreementState
@@ -14,7 +16,8 @@ import ru.pmlite.api.values.UserId
 
 @Repository
 class AgreementRepository(
-    private val jdbcTemplate: NamedParameterJdbcTemplate
+    private val jdbcTemplate: NamedParameterJdbcTemplate,
+  private val jdbcClient: JdbcClient
 ) {
     fun createAgreement(type: AgreementType, userId: UserId): AgreementId {
         val keyHolder = GeneratedKeyHolder()
@@ -51,6 +54,21 @@ class AgreementRepository(
         {rs, _ -> AgreementId(rs.getLong("id")) }
 
     }
+
+  fun findTeamAgreements(agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcClient.sql("""
+      select id from agreements a 
+      where 
+          CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
+          and a.type = 'TEAM'
+      offset :offset limit :limit
+    """.trimIndent())
+      .param("offset", pageable?.offset)
+      .param("limit", pageable?.pageSize)
+      .param("id", agreementId?.id)
+      .query(mapToAgreement)
+      .list()
+  }
 
     fun findTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
         return jdbcTemplate.query("""
@@ -145,4 +163,8 @@ class AgreementRepository(
             )
         } else emptyList()
     }
+
+  private val mapToAgreement  = RowMapper<AgreementId> { rs, _ ->
+    AgreementId(rs.getLong("id"))
+  }
 }
