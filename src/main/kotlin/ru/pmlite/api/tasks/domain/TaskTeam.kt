@@ -1,16 +1,15 @@
-package ru.pmlite.api.users.domain
+package ru.pmlite.api.tasks.domain
 
-import ru.pmlite.api.teams.domain.UserTeamRole
 import ru.pmlite.api.values.AgreementId
+import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.TeamId
 import java.time.Instant
 
-data class UserTeam(
+data class TaskTeam(
     val agreementId: AgreementId,
     val teamId: TeamId,
-    val userId: Long,
+    val taskId: TaskId,
     val name: String,
-    val role: UserTeamRole,
     val createdAt: Instant
 ) {
     val id get() = agreementId.id
