@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 import ru.pmlite.api.account.dto.*
 import ru.pmlite.api.security.domain.UserRole
 import ru.pmlite.api.tasks.domain.UserTaskRole
-import ru.pmlite.api.tasks.domain.UserTeamRole
+import ru.pmlite.api.teams.domain.UserTeamRole
 import ru.pmlite.api.users.exceptions.UserNotFoundException
 import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.TeamId

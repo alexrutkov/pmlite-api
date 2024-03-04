@@ -10,7 +10,7 @@ import ru.pmlite.api.agreements.services.AgreementService
 import ru.pmlite.api.agreements.services.DecisionService
 import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.tags.repositories.TagsRepository
-import ru.pmlite.api.tasks.domain.UserTeamRole
+import ru.pmlite.api.teams.domain.UserTeamRole
 import ru.pmlite.api.teams.dto.CreateTeamCommand
 import ru.pmlite.api.teams.dto.TeamUserRoleDto
 import ru.pmlite.api.teams.dto.UpdateTeamCommand
