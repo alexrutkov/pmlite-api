@@ -10,7 +10,6 @@ import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.tags.repositories.TagsRepository
 import ru.pmlite.api.users.domain.UserDetails
 import ru.pmlite.api.users.domain.UserShortDetails
-import ru.pmlite.api.users.domain.UserTask
 import ru.pmlite.api.users.repositories.SearchUserRepository
 import ru.pmlite.api.users.repositories.UsersRepository
 import ru.pmlite.api.values.UserId
@@ -40,10 +39,6 @@ class UsersService(
         val tags = tagsRepository.getTagsByUser(userId)
             .filter { it.state == AgreementState.APPROVED }
         return UserDetails(details, tags)
-    }
-
-    fun getUserTasks(id: Long, pageable: Pageable): List<UserTask> {
-        return repository.getUserTasks(id, pageable)
     }
 
     fun searchMyUsers(search: String, pageable: Pageable): List<UserShortDetails> {

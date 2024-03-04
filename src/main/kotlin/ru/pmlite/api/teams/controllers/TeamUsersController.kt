@@ -20,6 +20,4 @@ class TeamUsersController(
         @PathVariable id: TeamId,
         @PathVariable userId: Long
     ) = service.cancelUser(id, UserId(userId))
-    @DeleteMapping("{id}")
-    fun cancelTeam(@PathVariable id: TeamId) = service.cancelTeam(id)
 }

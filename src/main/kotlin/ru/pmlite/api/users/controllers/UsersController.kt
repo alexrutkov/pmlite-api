@@ -28,11 +28,7 @@ class UsersController(
     @GetMapping("{id}")
     fun getUserDetails(@PathVariable id: Long) = service.getUserDetails(UserId(id))
 
-    @GetMapping("{id}/tasks")
-    fun getUserTasks(
-        @PathVariable id: Long,
-        pageable: Pageable
-    ) = service.getUserTasks(id, pageable)
+
 
     @GetMapping("{id}/avatar.jpg",
         produces = [MediaType.IMAGE_JPEG_VALUE])
