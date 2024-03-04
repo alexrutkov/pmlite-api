@@ -20,6 +20,4 @@ class TaskUsersController(
         @PathVariable id: Long,
         @PathVariable userId: Long
     ) = service.cancelUser(TaskId(id), UserId(userId))
-    @DeleteMapping("{id}")
-    fun cancelTask(@PathVariable id: TaskId) = service.cancelTask(id)
 }

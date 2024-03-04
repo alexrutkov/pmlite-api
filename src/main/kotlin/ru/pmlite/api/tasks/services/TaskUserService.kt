@@ -41,12 +41,4 @@ class TaskUserService(
             publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.TASK_UPDATED))
         }
     }
-    @Transactional
-    fun cancelTask(id: TaskId) {
-        val userTask = taskUserRepository.getTaskUser(id, securityService.userId)
-        if (userTask.role != UserTaskRole.OWNER) {
-            decisionService.decide(DecisionCommand(userTask.agreementId, Decision.DECLINE))
-            publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.TASK_UPDATED))
-        }
-    }
 }
