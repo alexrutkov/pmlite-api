@@ -18,7 +18,10 @@ class TeamController(
 
   @PutMapping("{id}")
   fun updateTask(
-    @PathVariable id: Long,
+    @PathVariable id: TeamId,
     @Valid @RequestBody command: UpdateTeamCommand
-  ) = service.updateTeam(TeamId(id), command)
+  ) = service.updateTeam(id, command)
+
+  @PostMapping("{id}/join")
+  fun joinToTeam(@PathVariable id: TeamId) = service.joinToTeam(id)
 }

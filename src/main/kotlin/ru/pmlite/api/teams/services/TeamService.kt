@@ -1,7 +1,10 @@
 package ru.pmlite.api.teams.services
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import ru.pmlite.api.account.domains.AccountEventType
+import ru.pmlite.api.account.events.AccountEvent
 import ru.pmlite.api.agreements.domains.AgreementType
 import ru.pmlite.api.agreements.domains.Decision
 import ru.pmlite.api.agreements.domains.DecisionMode
@@ -24,7 +27,8 @@ class TeamService(
   private val tagsRepository: TagsRepository,
   private val agreementService: AgreementService,
   private val decisionService: DecisionService,
-  private val repository: TeamRepository
+  private val repository: TeamRepository,
+  private val publisher: ApplicationEventPublisher
 ) {
   @Transactional
   fun createTeam(command: CreateTeamCommand) {
@@ -52,5 +56,12 @@ class TeamService(
   fun updateTeam(teamId: TeamId, command: UpdateTeamCommand) {
     this.repository.updateTeam(teamId, command)
     tagsRepository.addTeamTags(teamId, command.tags)
+  }
+  @Transactional
+  fun joinToTeam(id: TeamId) {
+    repository.findAgreementByTeamUser(id, securityService.userId)
+      ?.also(agreementService::resetAgreement)
+      ?: addUser(id, UserTeamRole.EMPLOYEE)
+    publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.ROLES_UPDATED))
   }
 }

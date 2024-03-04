@@ -16,53 +16,59 @@ import ru.pmlite.api.values.UserId
 
 @Repository
 class AgreementRepository(
-    private val jdbcTemplate: NamedParameterJdbcTemplate,
+  private val jdbcTemplate: NamedParameterJdbcTemplate,
   private val jdbcClient: JdbcClient
 ) {
-    fun createAgreement(type: AgreementType, userId: UserId): AgreementId {
-        val keyHolder = GeneratedKeyHolder()
-        jdbcTemplate.update("""
+  fun createAgreement(type: AgreementType, userId: UserId): AgreementId {
+    val keyHolder = GeneratedKeyHolder()
+    jdbcTemplate.update(
+      """
             INSERT INTO agreements (user_id, type)
             VALUES (:userId, :type::agreement_type) returning id
         """.trimIndent(),
-            MapSqlParameterSource("type", type.name)
-                .addValue("userId", userId.id),
-            keyHolder
-        )
-        return (keyHolder.keys?.get("id") as Long).let(::AgreementId)
-    }
+      MapSqlParameterSource("type", type.name)
+        .addValue("userId", userId.id),
+      keyHolder
+    )
+    return (keyHolder.keys?.get("id") as Long).let(::AgreementId)
+  }
 
-    fun updateAgreement(agreementId: AgreementId, state: AgreementState) {
-        jdbcTemplate.update("""
+  fun updateAgreement(agreementId: AgreementId, state: AgreementState) {
+    jdbcTemplate.update(
+      """
             update agreements set state = :state::agreement_state where id = :id
         """.trimIndent(),
-            MapSqlParameterSource("id", agreementId.id)
-                .addValue("state", state.name)
-            )
-    }
+      MapSqlParameterSource("id", agreementId.id)
+        .addValue("state", state.name)
+    )
+  }
 
-    fun findTags(agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
-        return jdbcTemplate.query("""
+  fun findTags(agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcTemplate.query(
+      """
             select id from agreements a where 
              CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
              and a.type = 'TAG'
             offset :offset limit :limit
         """.trimIndent(),
-            MapSqlParameterSource("offset", pageable?.offset)
-                .addValue("id", agreementId?.id)
-                .addValue("limit", pageable?.pageSize))
-        {rs, _ -> AgreementId(rs.getLong("id")) }
+      MapSqlParameterSource("offset", pageable?.offset)
+        .addValue("id", agreementId?.id)
+        .addValue("limit", pageable?.pageSize)
+    )
+    { rs, _ -> AgreementId(rs.getLong("id")) }
 
-    }
+  }
 
   fun findTeamAgreements(agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
-    return jdbcClient.sql("""
+    return jdbcClient.sql(
+      """
       select id from agreements a 
       where 
           CASE WHEN :id::bigint is null THEN a.state = 'PENDING' ELSE a.id = :id END
           and a.type = 'TEAM'
       offset :offset limit :limit
-    """.trimIndent())
+    """.trimIndent()
+    )
       .param("offset", pageable?.offset)
       .param("limit", pageable?.pageSize)
       .param("id", agreementId?.id)
@@ -70,8 +76,9 @@ class AgreementRepository(
       .list()
   }
 
-    fun findTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
-        return jdbcTemplate.query("""
+  fun findTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcTemplate.query(
+      """
             with cte as (
                 select concat_ws('.', '*', task_id, '*') as path from task_users where user_id = :userId and role = 'OWNER'
             )
@@ -83,15 +90,16 @@ class AgreementRepository(
                 and t.path ?? (select array_agg(cte.path) from cte)::lquery[]
              offset :offset limit :limit
         """.trimIndent(),
-            MapSqlParameterSource("userId", userId.id)
-                .addValue("id", agreementId?.id)
-                .addValue("offset", pageable?.offset)
-                .addValue("limit", pageable?.pageSize)
-        ) {rs, _ -> AgreementId(rs.getLong("id")) }
-    }
+      MapSqlParameterSource("userId", userId.id)
+        .addValue("id", agreementId?.id)
+        .addValue("offset", pageable?.offset)
+        .addValue("limit", pageable?.pageSize)
+    ) { rs, _ -> AgreementId(rs.getLong("id")) }
+  }
 
-    fun findUserTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
-        return jdbcTemplate.query("""
+  fun findUserTask(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcTemplate.query(
+      """
             select a.id from agreements a
               join task_users tu on a.id = tu.agreement_id
               join task_users tu2 on tu.task_id = tu2.task_id
@@ -102,14 +110,37 @@ class AgreementRepository(
                 and tu2.user_id != tu.user_id
             offset :offset limit :limit
         """.trimIndent(), MapSqlParameterSource("userId", userId.id)
-            .addValue("id", agreementId?.id)
-            .addValue("offset", pageable?.offset)
-            .addValue("limit", pageable?.pageSize))
-        {rs, _ -> AgreementId(rs.getLong("id")) }
-    }
+        .addValue("id", agreementId?.id)
+        .addValue("offset", pageable?.offset)
+        .addValue("limit", pageable?.pageSize)
+    )
+    { rs, _ -> AgreementId(rs.getLong("id")) }
+  }
 
-    fun getAgreementDetailsByIds(ids: List<AgreementId>): List<AgreementSummary> {
-        return if (ids.isNotEmpty()) jdbcTemplate.query("""
+  fun findTeamUsers(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcClient.sql("""
+      select a.id from agreements a
+              join team_users tu on a.id = tu.agreement_id
+              join team_users tu2 on tu.team_id = tu2.team_id
+            where
+                CASE WHEN :agreementId::bigint is null THEN a.state = 'PENDING' ELSE a.id = :agreementId END
+                and a.type = 'TEAM_USER'
+                and tu2.user_id = :userId and tu2.role = 'OWNER'
+                and tu2.user_id != tu.user_id
+            offset :offset limit :limit
+    """.trimIndent())
+      .param("userId", userId.id)
+      .param("agreementId", agreementId?.id)
+      .param("offset", pageable?.offset)
+      .param("limit", pageable?.pageSize)
+      .query(Long::class.java)
+      .list()
+      .map(::AgreementId)
+  }
+
+  fun getAgreementDetailsByIds(ids: List<AgreementId>): List<AgreementSummary> {
+    return if (ids.isNotEmpty()) jdbcTemplate.query(
+      """
             select 
                 a.id, a.created_at, a.type, u.id as userId, u.name, a.state,
                 (
@@ -152,19 +183,21 @@ class AgreementRepository(
                 ) as details
             from agreements a join users u on a.user_id = u.id
             where a.id in (:ids)
-        """.trimIndent(), MapSqlParameterSource("ids", ids.map(AgreementId::id))) { rs, _ ->
-            AgreementSummary(
-                AgreementId(rs.getLong("id")),
-                UserSummary(rs.getLong("userId"), rs.getString("name")),
-                AgreementType.valueOf(rs.getString("type")),
-                rs.getTimestamp("created_at").toInstant(),
-                AgreementState.valueOf(rs.getString("state")),
-                rs.getString("details")
-            )
-        } else emptyList()
-    }
+        """.trimIndent(), MapSqlParameterSource("ids", ids.map(AgreementId::id))
+    ) { rs, _ ->
+      AgreementSummary(
+        AgreementId(rs.getLong("id")),
+        UserSummary(rs.getLong("userId"), rs.getString("name")),
+        AgreementType.valueOf(rs.getString("type")),
+        rs.getTimestamp("created_at").toInstant(),
+        AgreementState.valueOf(rs.getString("state")),
+        rs.getString("details")
+      )
+    } else emptyList()
+  }
 
-  private val mapToAgreement  = RowMapper<AgreementId> { rs, _ ->
+
+  private val mapToAgreement = RowMapper<AgreementId> { rs, _ ->
     AgreementId(rs.getLong("id"))
   }
 }

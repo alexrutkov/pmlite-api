@@ -12,6 +12,7 @@ import ru.pmlite.api.values.AgreementId
 import ru.pmlite.api.values.TagId
 import ru.pmlite.api.values.TeamId
 import ru.pmlite.api.values.UserId
+import kotlin.jvm.optionals.getOrNull
 
 val mapTeamSummary = RowMapper<TeamSummary> { rs, _ ->
   TeamSummary(
@@ -159,5 +160,17 @@ class TeamRepository(
       .param("name", command.name)
       .param("description", command.description)
       .update()
+  }
+
+  fun findAgreementByTeamUser(teamId: TeamId, userId: UserId): AgreementId? {
+    return jdbcClient.sql("""
+      select agreement_id from team_users where team_id = :teamId and user_id = :userId
+    """.trimIndent())
+      .param("teamId", teamId.id)
+      .param("userId", userId.id)
+      .query(Long::class.java)
+      .optional()
+      .map(::AgreementId)
+      .getOrNull()
   }
 }
