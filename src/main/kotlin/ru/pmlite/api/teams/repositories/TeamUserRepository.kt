@@ -44,7 +44,7 @@ class TeamUserRepository(
             from team_users tu 
             join agreements a on tu.agreement_id = a.id
             join users u on tu.user_id = u.id
-            where tu.team_id = :taskId and tu.user_id = :userId
+            where tu.team_id = :teamId and tu.user_id = :userId
         """.trimIndent())
           .param("teamId", teamId.id)
           .param("userId", userId.id)
