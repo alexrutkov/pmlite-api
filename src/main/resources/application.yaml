@@ -47,6 +47,16 @@ server:
     include-message: always
     include-stacktrace: never
 
+management:
+  otlp:
+    metrics:
+      export:
+        url: http://192.168.178.101:4318/v1/metrics
+        step: 1m
+  health:
+    rabbit:
+      enabled: false
+
 #logging:
 #  level:
 #    org.springframework.security: TRACE

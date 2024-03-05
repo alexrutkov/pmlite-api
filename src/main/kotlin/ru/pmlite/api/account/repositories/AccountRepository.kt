@@ -19,19 +19,17 @@ class AccountRepository(
   private val jdbcClient: JdbcClient
 ) {
   fun getAccountDetails(userId: UserId): AccountDetails {
-    return runCatching {
-      jdbcTemplate.queryForObject(
-        """
-                select 
-                    name
-                from users where id = :id
-            """.trimIndent(), MapSqlParameterSource("id", userId.id)
-      ) { rs, _ ->
+    return jdbcClient.sql( """ 
+      select  name from users where id = :id
+      """.trimIndent())
+      .param("id", userId.id)
+      .query { rs, _ ->
         AccountDetails(
           userId.id, rs.getString("name")
         )
-      } ?: throw UserNotFoundException()
-    }.getOrThrow()
+      }
+      .optional()
+      .orElseThrow { UserNotFoundException() }
   }
 
   fun getAccountRoles(userId: UserId): List<UserRole> {
@@ -72,6 +70,25 @@ class AccountRepository(
         AccountTeamRole(
           TeamId(rs.getLong("team_id")),
           UserTeamRole.valueOf(rs.getString("role"))
+        )
+      }.list()
+  }
+
+  fun getAccountTaskTeams(userId: UserId): List<AccountTaskTeamRole> {
+    return jdbcClient.sql("""
+      with myTeams as (
+          select  t.team_id from team_users t join agreements a on t.agreement_id = a.id
+          where t.user_id = :userId and a.state = 'APPROVED')
+      select * from task_teams tt 
+          join myTeams mt on mt.team_id = tt.team_id
+          join agreements a on tt.agreement_id = a.id
+      where a.state != 'CANCELLED'
+    """.trimIndent())
+      .param("userId", userId.id)
+      .query {rs, _ ->
+        AccountTaskTeamRole(
+          TaskId(rs.getLong("task_id")),
+          TeamId(rs.getLong("team_id"))
         )
       }.list()
   }

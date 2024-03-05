@@ -24,6 +24,7 @@ class AccountService(
                 roles = repository.getAccountRoles(userId),
                 taskRoles = repository.getAccountTaskRoles(userId),
                 teamRoles = repository.getAccountTeamRoles(userId),
+                taskTeams = repository.getAccountTaskTeams(userId),
             )
     }
 

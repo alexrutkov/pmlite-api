@@ -35,6 +35,11 @@ class TeamDetailsService(
       .let(::addDetails)
   }
 
+  fun getMyOwnerTeams(): List<TeamSummary> {
+    return repository.getMyOwnerTeams(securityService.userId)
+      .let(::addDetails)
+  }
+
 
 
   fun searchAllTeams(search: String, pageable: Pageable): List<TeamSummary> {
@@ -57,4 +62,6 @@ class TeamDetailsService(
       )
     }
   }
+
+
 }

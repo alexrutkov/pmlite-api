@@ -8,10 +8,7 @@ import org.springframework.stereotype.Repository
 import ru.pmlite.api.agreements.domains.AgreementState
 import ru.pmlite.api.tags.domains.TagDetails
 import ru.pmlite.api.teams.dto.*
-import ru.pmlite.api.values.AgreementId
-import ru.pmlite.api.values.TagId
-import ru.pmlite.api.values.TeamId
-import ru.pmlite.api.values.UserId
+import ru.pmlite.api.values.*
 import kotlin.jvm.optionals.getOrNull
 
 val mapTeamSummary = RowMapper<TeamSummary> { rs, _ ->
@@ -52,6 +49,17 @@ class TeamRepository(
       .param("teamId", role.teamId.id)
       .param("userId", role.userId.id)
       .param("role", role.role.name)
+      .param("agreementId", role.agreementId.id)
+      .update()
+  }
+
+  fun addTeamTask(role: TeamTaskRoleDto) {
+    jdbcClient.sql("""
+            INSERT INTO task_teams (team_id, task_id, agreement_id)
+            VALUES (:teamId, :taskId, :agreementId)
+        """.trimIndent())
+      .param("teamId", role.teamId.id)
+      .param("taskId", role.taskId.id)
       .param("agreementId", role.agreementId.id)
       .update()
   }
@@ -112,6 +120,26 @@ class TeamRepository(
       .list()
   }
 
+  fun getMyOwnerTeams(userId: UserId): List<TeamSummary> {
+    return jdbcClient.sql("""
+            with cte as (
+                select t.team_id from team_users t 
+                    join agreements a on t.agreement_id = a.id
+                where t.user_id = :userId and t.role = 'OWNER' and a.state = 'APPROVED'
+            )
+            select distinct on (t.id) 
+                t.id, t.name, t.description, t.created_at,
+                 (select count(*) from likes l where l.entity_id = t.id and l.type = 'TEAM' and l.state = 'ACTIVE') as likeAmount,
+                 (select count(*) from stars l where l.entity_id = t.id and l.type = 'TEAM' and l.state = 'ACTIVE') as starAmount 
+            from teams t join cte on cte.team_id = t.id
+                join agreements a on t.agreement_id = a.id 
+            where a.state = 'APPROVED'
+        """.trimIndent())
+      .param("userId", userId.id)
+      .query(mapTeamSummary)
+      .list()
+  }
+
   fun getTeam(teamId: TeamId): TeamDetails {
     return TeamDetails(
       getTeamSummary(teamId),
@@ -162,6 +190,8 @@ class TeamRepository(
       .update()
   }
 
+
+
   fun findAgreementByTeamUser(teamId: TeamId, userId: UserId): AgreementId? {
     return jdbcClient.sql("""
       select agreement_id from team_users where team_id = :teamId and user_id = :userId
@@ -173,4 +203,19 @@ class TeamRepository(
       .map(::AgreementId)
       .getOrNull()
   }
+
+  fun findAgreementByTeamTask(teamId: TeamId, taskId: TaskId): AgreementId? {
+    return jdbcClient.sql("""
+      select agreement_id from task_teams where team_id = :teamId and task_id = :taskId
+    """.trimIndent())
+      .param("teamId", teamId.id)
+      .param("taskId", taskId.id)
+      .query(Long::class.java)
+      .optional()
+      .map(::AgreementId)
+      .getOrNull()
+
+  }
+
+
 }

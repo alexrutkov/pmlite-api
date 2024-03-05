@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*
 import ru.pmlite.api.teams.dto.CreateTeamCommand
 import ru.pmlite.api.teams.dto.UpdateTeamCommand
 import ru.pmlite.api.teams.services.TeamService
+import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.TeamId
 
 @RequestMapping("/api/teams")
@@ -24,4 +25,10 @@ class TeamController(
 
   @PostMapping("{id}/join")
   fun joinToTeam(@PathVariable id: TeamId) = service.joinToTeam(id)
+
+  @PostMapping("{id}/joinToTask/{taskId}")
+  fun joinTeamToTask(
+    @PathVariable id: TeamId,
+    @PathVariable taskId: TaskId
+  ) = service.joinTeamToTask(id, taskId)
 }

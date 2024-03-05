@@ -15,10 +15,13 @@ import ru.pmlite.api.security.services.SecurityService
 import ru.pmlite.api.tags.repositories.TagsRepository
 import ru.pmlite.api.teams.domain.UserTeamRole
 import ru.pmlite.api.teams.dto.CreateTeamCommand
+import ru.pmlite.api.teams.dto.TeamTaskRoleDto
 import ru.pmlite.api.teams.dto.TeamUserRoleDto
 import ru.pmlite.api.teams.dto.UpdateTeamCommand
 import ru.pmlite.api.teams.repositories.TeamRepository
+import ru.pmlite.api.teams.repositories.TeamUserRepository
 import ru.pmlite.api.values.AgreementId
+import ru.pmlite.api.values.TaskId
 import ru.pmlite.api.values.TeamId
 
 @Service
@@ -28,6 +31,7 @@ class TeamService(
   private val agreementService: AgreementService,
   private val decisionService: DecisionService,
   private val repository: TeamRepository,
+  private val teamUserRepository: TeamUserRepository,
   private val publisher: ApplicationEventPublisher
 ) {
   @Transactional
@@ -63,5 +67,23 @@ class TeamService(
       ?.also(agreementService::resetAgreement)
       ?: addUser(id, UserTeamRole.EMPLOYEE)
     publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.ROLES_UPDATED))
+  }
+
+  fun joinTeamToTask(teamId: TeamId, taskId: TaskId) {
+    val teamRole = teamUserRepository.getTeamUser(teamId, securityService.userId)
+    if (teamRole.role == UserTeamRole.OWNER) {
+      repository.findAgreementByTeamTask(teamId, taskId)
+        ?.also(agreementService::resetAgreement)
+        ?: addTeamTask(teamId, taskId)
+      publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.ROLES_UPDATED))
+    }
+  }
+
+  private fun addTeamTask(teamId: TeamId, taskId: TaskId): AgreementId {
+    val agreementId = agreementService.createAgreement(AgreementType.TASK_TEAM)
+    repository.addTeamTask(
+      TeamTaskRoleDto(taskId, teamId, agreementId)
+    )
+    return agreementId
   }
 }

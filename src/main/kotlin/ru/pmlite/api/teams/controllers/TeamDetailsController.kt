@@ -22,6 +22,9 @@ class TeamDetailsController(
   @GetMapping("my")
   fun getMyTeams(pageable: Pageable) = service.getMyTeams(pageable)
 
+  @GetMapping("myOwnerTeams")
+  fun getMyOwnerTeams() = service.getMyOwnerTeams()
+
   @GetMapping("{id}")
   fun getTeam(@PathVariable id: TeamId) = service.getTeam(id)
 }
