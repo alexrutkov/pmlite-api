@@ -138,6 +138,26 @@ class AgreementRepository(
       .map(::AgreementId)
   }
 
+  fun findTaskTeams(userId: UserId, agreementId: AgreementId? = null, pageable: Pageable? = null): List<AgreementId> {
+    return jdbcClient.sql("""
+      select a.id from agreements a
+              join task_teams tt on a.id = tt.agreement_id
+              join task_users tu on tu.task_id = tt.task_id
+            where
+                CASE WHEN :agreementId::bigint is null THEN a.state = 'PENDING' ELSE a.id = :agreementId END
+                and a.type = 'TASK_TEAM'
+                and tu.user_id = :userId and tu.role = 'OWNER'
+            offset :offset limit :limit
+    """.trimIndent())
+      .param("userId", userId.id)
+      .param("agreementId", agreementId?.id)
+      .param("offset", pageable?.offset)
+      .param("limit", pageable?.pageSize)
+      .query(Long::class.java)
+      .list()
+      .map(::AgreementId)
+  }
+
   fun getAgreementDetailsByIds(ids: List<AgreementId>): List<AgreementSummary> {
     return if (ids.isNotEmpty()) jdbcTemplate.query(
       """

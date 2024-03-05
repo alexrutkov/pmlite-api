@@ -43,6 +43,12 @@ class AgreementDetailsService(
                 agreementRepository.findTeamUsers(securityService.userId).size
             )
         )
+        pending.add(
+            PendingAgreementCount(
+                AgreementType.TASK_TEAM,
+                agreementRepository.findTaskTeams(securityService.userId).size
+            )
+        )
         return PendingAgreementDetails(pending)
     }
 
@@ -70,8 +76,13 @@ class AgreementDetailsService(
             .let(agreementRepository::getAgreementDetailsByIds)
     }
 
-    fun getTeamUsersAgreements(pageable: Pageable): Any {
+    fun getTeamUsersAgreements(pageable: Pageable): List<AgreementSummary> {
         return agreementRepository.findTeamUsers(securityService.userId, pageable = pageable)
+            .let(agreementRepository::getAgreementDetailsByIds)
+    }
+
+    fun getTaskTeamsAgreements(pageable: Pageable): List<AgreementSummary> {
+        return agreementRepository.findTaskTeams(securityService.userId, pageable = pageable)
             .let(agreementRepository::getAgreementDetailsByIds)
     }
 
@@ -85,7 +96,7 @@ class AgreementDetailsService(
             AgreementType.TAG -> if (isTagAllowed()) agreementRepository.findTags(agreement.id) else emptyList()
             AgreementType.TASK_USER -> agreementRepository.findUserTask(securityService.userId, agreement.id)
             AgreementType.TEAM -> if (isTeamAllowed()) agreementRepository.findTeamAgreements(agreement.id) else emptyList()
-            AgreementType.TASK_TEAM -> TODO()
+            AgreementType.TASK_TEAM -> agreementRepository.findTaskTeams(securityService.userId, agreement.id)
             AgreementType.TEAM_USER -> agreementRepository.findTeamUsers(securityService.userId, agreement.id)
         }
     }

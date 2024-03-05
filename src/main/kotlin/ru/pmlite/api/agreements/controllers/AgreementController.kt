@@ -28,6 +28,9 @@ class AgreementController(
     @GetMapping("teamUsers")
     fun getTeamUsersAgreements(pageable: Pageable) = agreementService.getTeamUsersAgreements(pageable)
 
+    @GetMapping("taskTeams")
+    fun getTaskTeamsAgreements(pageable: Pageable) = agreementService.getTaskTeamsAgreements(pageable)
+
     @PreAuthorize("hasRole('AGREEMENT_TAG')")
     @GetMapping("tags")
     fun getTagsAgreements(pageable: Pageable) = agreementService.getTagsAgreements(pageable)
