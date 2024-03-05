@@ -62,17 +62,4 @@ management:
     rabbit:
       enabled: false
 
-#logging:
-#  level:
-#    org.springframework.security: TRACE
-#    org.springframework.security.messaging.web.socket: TRACE
-#    org.springframework.web.socket.server: TRACE
-#
-#    org:
-#      springframework:
-#        security:
-#          web:
-#            csrf: TRACE
-#    root: debug
-
 
