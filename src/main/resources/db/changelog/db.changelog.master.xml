@@ -3,11 +3,11 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <includeAll path="agreements/" relativeToChangelogFile="true" />
+    <includeAll path="tables/" relativeToChangelogFile="true" />
 
     <includeAll path="users/" relativeToChangelogFile="true" />
     <includeAll path="teams/" relativeToChangelogFile="true" />
-    <includeAll path="tags/" relativeToChangelogFile="true" />
+<!--    <includeAll path="tags/" relativeToChangelogFile="true" />-->
 
     <includeAll path="tasks/" relativeToChangelogFile="true" />
     <includeAll path="account/" relativeToChangelogFile="true" />
