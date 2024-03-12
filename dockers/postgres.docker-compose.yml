@@ -1,0 +1,89 @@
+version: "3.2"
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    command: >
+      -c ssl=on
+      -c ssl_cert_file=/var/lib/postgresql/config/server.crt
+      -c ssl_key_file=/var/lib/postgresql/config/server.key
+      -c ssl_ca_file=/var/lib/postgresql/config/ca.crt
+    env_file:
+      - /postgres/.env
+    ports:
+      - "10.8.0.1:5432:5432"
+    volumes:
+      - /containers/postgres/pgdata:/var/lib/postgresql/data/
+      - /containers/postgres/config/server.crt:/var/lib/postgresql/config/server.crt
+      - /containers/postgres/config/server.key:/var/lib/postgresql/config/server.key
+      - /containers/postgres/config/ca.crt:/var/lib/postgresql/config/ca.crt
+      - /containers/postgres/config/pg_hba.conf:/var/lib/postgresql/config/pg_hba.conf
+      - /containers/postgres/scripts:/docker-entrypoint-initdb.d
+
+  app:
+    image: eclipse-temurin:21.0.2_13-jdk-alpine
+    env_file:
+      - /app/.env
+    entrypoint: ["java", "-jar", "/opt/app/api.jar"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - /containers/app/api-0.0.1.jar:/opt/app/api.jar
+      - /containers/app/data/:/root/
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3.12
+    container_name: 'rabbitmq'
+    hostname: rabbitmq
+    restart: always
+    env_file:
+      - /rabbitmq/.env
+
+    volumes:
+      - /containers/rabbitmq/data/:/var/lib/rabbitmq/
+      - /containers/rabbitmq/log/:/var/log/rabbitmq/
+      - /containers/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    restart: always
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - /containers/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    restart: always
+    volumes:
+      - /containers/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    ports:
+      - "10.8.0.1:3000:3000"
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+
+  loki:
+    image: grafana/loki:latest
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+
+  tempo:
+    image: grafana/tempo:latest
+    restart: always
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - /containers/tempo/tempo.yml:/etc/tempo.yml
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.95.0
+    restart: always
+    command:
+      - --config=/etc/otelcol-contrib/otel-collector-config.yaml
+    volumes:
+      - /containers/collectors/otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml

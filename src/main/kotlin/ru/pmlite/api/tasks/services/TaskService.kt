@@ -53,6 +53,7 @@ class TaskService(
         repository.createTask(command, agreementId)
             .also(::addOwnerUser)
             .also { tagsRepository.addTaskTags(it, command.tags) }
+        publisher.publishEvent(AccountEvent(securityService.userId, AccountEventType.ROLES_UPDATED))
     }
 
     @Transactional

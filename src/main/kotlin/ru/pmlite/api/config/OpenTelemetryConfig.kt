@@ -41,7 +41,7 @@ class OpenTelemetryConfig  {
   @Bean
   fun otelLogRecordProcessor(): LogRecordProcessor {
     return BatchLogRecordProcessor
-      .builder(OtlpGrpcLogRecordExporter.builder().setEndpoint("http://192.168.178.101:4317").build())
+      .builder(OtlpGrpcLogRecordExporter.builder().setEndpoint("http://otel-collector:4317").build())
       .build()
   }
 

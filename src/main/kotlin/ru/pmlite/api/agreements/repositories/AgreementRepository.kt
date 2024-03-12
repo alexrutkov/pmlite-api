@@ -211,7 +211,7 @@ class AgreementRepository(
         AgreementType.valueOf(rs.getString("type")),
         rs.getTimestamp("created_at").toInstant(),
         AgreementState.valueOf(rs.getString("state")),
-        rs.getString("details")
+        rs.getString("details") ?: ""
       )
     } else emptyList()
   }

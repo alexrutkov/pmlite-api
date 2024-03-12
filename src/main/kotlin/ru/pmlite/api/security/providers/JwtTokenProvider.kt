@@ -17,6 +17,7 @@ import ru.pmlite.api.security.config.JwtProperties
 import ru.pmlite.api.security.filters.AUTH_COOKIE_NAME
 import ru.pmlite.api.security.repositories.UserAuthenticatedRepository
 import ru.pmlite.api.values.UserId
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -41,7 +42,7 @@ class JwtTokenProvider(
         val claims: Claims =  Jwts.claims().subject(authentication.name)
             .add(AUTHORITIES_KEY, authorities.joinToString(", ") { it.authority.toString() })
             .build()
-
+        logger.info { "Authorities: ${authentication.name}, ${authorities}" }
         val now = Date()
         val validity = Date(now.time + jwtProperties.validityInMs.toMillis())
         return Jwts.builder()
@@ -64,7 +65,7 @@ class JwtTokenProvider(
             val jws = jwtParser.parseSignedClaims(token)
             val claims: Claims = jws.payload
             val updatedUserAt = UserId(claims.subject.toLong())
-                .let(userAuthenticatedRepository::getUserDetailsById).updatedAt
+                .let(userAuthenticatedRepository::getUserDetailsById).updatedAt.truncatedTo(ChronoUnit.SECONDS)
             if (claims.issuedAt.toInstant() < updatedUserAt)
                 throw ExpiredJwtException(jws.header, claims, "Данные пользователя были изменены!")
             return !claims.expiration.before(Date())
