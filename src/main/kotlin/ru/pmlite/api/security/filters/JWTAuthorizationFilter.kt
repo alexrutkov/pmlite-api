@@ -1,8 +1,5 @@
 package ru.pmlite.api.security.filters
 
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.UnsupportedJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
@@ -33,17 +30,7 @@ class JWTAuthorizationFilter(
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Доступ был изменён!")
                     return
                 }
-            } catch (e: ExpiredJwtException) {
-                response.status = HttpServletResponse.SC_UNAUTHORIZED
-                response.addCookie(cookie)
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.message)
-                return
-            } catch (e: UnsupportedJwtException) {
-                response.status = HttpServletResponse.SC_UNAUTHORIZED
-                response.addCookie(cookie)
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.message)
-                return
-            } catch (e: MalformedJwtException) {
+            } catch (e: Exception) {
                 response.status = HttpServletResponse.SC_UNAUTHORIZED
                 response.addCookie(cookie)
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.message)

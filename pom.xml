@@ -253,7 +253,7 @@
 						<configuration>
 							<serverId>ssh</serverId>
 							<fromFile>target/api-0.0.1.jar</fromFile>
-							<url>scpexe://10.8.0.1:2834/containers/app</url>
+							<url>scpexe://10.9.0.1:22/containers/app</url>
 						</configuration>
 					</execution>
 				</executions>

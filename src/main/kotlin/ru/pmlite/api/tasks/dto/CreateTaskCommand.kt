@@ -8,7 +8,7 @@ import ru.pmlite.api.tags.dto.TagDto
 
 data class UpdateTaskCommand(
     @field: NotBlank
-    @field: Size(min = 2, max = 50)
+    @field: Size(min = 2, max = 75)
     val name: String,
     @field: NotBlank
     @field: Size(min = 2, max = 255)
